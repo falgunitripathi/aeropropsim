@@ -1,24 +1,30 @@
 :root {
   --text: #3c3a42;
-  --text-h: #08060d;
+  --text-h: #100c1c;
   --text-muted: #6b6375;
-  --bg: #fbfaf9;
+  --bg: #faf9fb;
   --bg-panel: #ffffff;
-  --border: #e2e0e5;
-  --accent: #2f6f9e;
-  --accent-bg: rgba(47, 111, 158, 0.08);
-  --accent-border: rgba(47, 111, 158, 0.4);
-  --error-bg: rgba(200, 40, 40, 0.08);
-  --error-border: rgba(200, 40, 40, 0.4);
+  --border: #e5e1ec;
+  --accent: #5b4ff5;
+  --accent-2: #f5a324;
+  --accent-bg: rgba(91, 79, 245, 0.08);
+  --accent-border: rgba(91, 79, 245, 0.35);
+  --error-bg: #fdeeee;
+  --error-border: rgba(200, 40, 40, 0.25);
   --error-text: #8c1f1f;
-  --code-bg: #f1efe9;
+  --code-bg: #f1eefb;
   --shadow:
-    rgba(0, 0, 0, 0.06) 0 4px 12px -4px, rgba(0, 0, 0, 0.04) 0 2px 4px -2px;
+    rgba(45, 30, 90, 0.06) 0 4px 14px -6px, rgba(45, 30, 90, 0.05) 0 2px 5px -2px;
 
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --ed-compressor: #5b4ff5;
+  --ed-turbine: #f5a324;
+  --ed-flame: #ef5b3f;
+
+  --sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --display: "Manrope", var(--sans);
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 16px/145% var(--sans);
+  font: 16px/150% var(--sans);
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -30,21 +36,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #c7c5cc;
-    --text-h: #f3f4f6;
-    --text-muted: #93909c;
-    --bg: #121216;
-    --bg-panel: #1a1a20;
-    --border: #2e2d35;
-    --accent: #6fb3e0;
-    --accent-bg: rgba(111, 179, 224, 0.12);
-    --accent-border: rgba(111, 179, 224, 0.4);
+    --text: #cbc8d3;
+    --text-h: #f5f3fb;
+    --text-muted: #9791a3;
+    --bg: #131019;
+    --bg-panel: #1c1826;
+    --border: #322c40;
+    --accent: #9b90ff;
+    --accent-2: #ffbb5c;
+    --accent-bg: rgba(155, 144, 255, 0.14);
+    --accent-border: rgba(155, 144, 255, 0.4);
     --error-bg: rgba(255, 100, 100, 0.1);
-    --error-border: rgba(255, 100, 100, 0.4);
-    --error-text: #ff8a8a;
-    --code-bg: #23222a;
+    --error-border: rgba(255, 100, 100, 0.35);
+    --error-text: #ff9a9a;
+    --code-bg: #241f33;
     --shadow:
-      rgba(0, 0, 0, 0.4) 0 4px 12px -4px, rgba(0, 0, 0, 0.3) 0 2px 4px -2px;
+      rgba(0, 0, 0, 0.4) 0 4px 14px -6px, rgba(0, 0, 0, 0.3) 0 2px 5px -2px;
+
+    --ed-compressor: #9b90ff;
+    --ed-turbine: #ffbb5c;
+    --ed-flame: #ff7a5c;
   }
 }
 
@@ -57,8 +68,8 @@ body {
 }
 
 h1, h2, h3 {
-  font-family: var(--sans);
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 800;
   color: var(--text-h);
 }
 
@@ -79,3 +90,17 @@ input, select, button {
   font: inherit;
   color: inherit;
 }
+
+/*
+ * Friendly icons in front of each configuration section's legend, keyed
+ * purely by DOM order (all seven fieldsets share .config-section, in a
+ * fixed order set by ConfigForm.jsx) so no section component needs to
+ * know about branding.
+ */
+.config-section:nth-of-type(1) legend::before { content: "✈️ "; }
+.config-section:nth-of-type(2) legend::before { content: "🌀 "; }
+.config-section:nth-of-type(3) legend::before { content: "🔥 "; }
+.config-section:nth-of-type(4) legend::before { content: "🌪️ "; }
+.config-section:nth-of-type(5) legend::before { content: "🚀 "; }
+.config-section:nth-of-type(6) legend::before { content: "⚖️ "; }
+.config-section:nth-of-type(7) legend .disclosure::before { content: "🔧 "; }
