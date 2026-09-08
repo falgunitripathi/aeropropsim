@@ -1,16 +1,19 @@
 import { useMemo, useState } from "react";
 import { defaultEngineConfig, solveEngine } from "./physics/engine.js";
 import ConfigForm from "./components/ConfigForm.jsx";
+import EngineDiagram from "./components/EngineDiagram.jsx";
 import ResultsPanel from "./components/ResultsPanel.jsx";
 import "./App.css";
 
 /**
- * AeroPropSim — a single-spool turbojet performance simulator.
+ * PropCalc — a single-spool turbojet performance simulator.
  *
  * All physics runs client-side, ported module-by-module from the
  * validated Python engineering core (see src/physics/*.js and the
  * top-level README) — this is a static site with no backend by design,
- * so it always works when someone clicks the link.
+ * so it always works when someone clicks the link. (The Python package
+ * underneath is still called `aeropropsim` — that's internal plumbing,
+ * not the project's name.)
  */
 function App() {
   const [config, setConfig] = useState(defaultEngineConfig());
@@ -29,11 +32,11 @@ function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>AeroPropSim</h1>
+        <h1>PropCalc</h1>
         <p className="app-subtitle">
-          An interactive single-spool turbojet performance simulator — every
-          number below is solved live, in your browser, from the same
-          validated cycle equations as the project's Python engineering core.
+          Build a jet engine, one number at a time. Change anything on the
+          left — altitude, pressure ratio, turbine type — and watch the
+          whole engine cycle re-solve instantly, right here in your browser.
         </p>
       </header>
 
@@ -43,24 +46,30 @@ function App() {
         <div className="results-area">
           {error ? (
             <div className="error-banner">
-              <strong>This configuration isn't physically solvable:</strong>
-              <p>{error}</p>
-              <p className="section-note">
-                Adjust an input on the left — most often this means the
-                turbine inlet temperature is too low (or too close to the
-                compressor exit temperature) for the chosen pressure ratio
-                and efficiencies.
-              </p>
+              <span className="error-icon" aria-hidden="true">
+                🚫
+              </span>
+              <div>
+                <strong>Not possible</strong>
+                <p>
+                  This combination doesn&rsquo;t work as a real engine. Try
+                  adjusting one of the numbers on the left — a small change
+                  is usually all it takes.
+                </p>
+              </div>
             </div>
           ) : (
-            <ResultsPanel result={result} />
+            <>
+              <EngineDiagram config={config} result={result} />
+              <ResultsPanel result={result} />
+            </>
           )}
         </div>
       </main>
 
       <footer className="app-footer">
         <p>
-          Formulas cited section-by-section (Ref: §N) back to the project's
+          Formulas cited section-by-section (Ref: §N) back to the project&rsquo;s
           compiled formula reference. See the repository README for
           validation status, known simplifications, and the two
           documented judgment calls (intake convention, choked-nozzle
