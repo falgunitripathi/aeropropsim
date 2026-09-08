@@ -1,4 +1,4 @@
-# PropCalc
+# ThrustForge
 
 A single-spool, single-design-point turbojet performance solver, plus an
 interactive website (`web/`) that lets you choose an engine configuration
@@ -9,7 +9,7 @@ and see the whole cycle solve live, in the browser.
 below for why), so once deployed it always works when someone clicks the
 link — no backend to keep alive.
 
-*(Naming note: the project and website are called PropCalc; the Python
+*(Naming note: the project and website are called ThrustForge; the Python
 engineering package inside — `aeropropsim/` — kept its original name,
 since that's internal plumbing rather than anything a visitor sees.)*
 
