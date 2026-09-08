@@ -6,7 +6,7 @@ import ResultsPanel from "./components/ResultsPanel.jsx";
 import "./App.css";
 
 /**
- * PropCalc — a single-spool turbojet performance simulator.
+ * ThrustForge — a single-spool turbojet performance simulator.
  *
  * All physics runs client-side, ported module-by-module from the
  * validated Python engineering core (see src/physics/*.js and the
@@ -32,7 +32,7 @@ function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <h1>PropCalc</h1>
+        <h1>ThrustForge</h1>
         <p className="app-subtitle">
           Build a jet engine, one number at a time. Change anything on the
           left — altitude, pressure ratio, turbine type — and watch the
