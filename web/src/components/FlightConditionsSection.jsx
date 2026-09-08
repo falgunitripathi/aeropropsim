@@ -26,9 +26,9 @@ export default function FlightConditionsSection({ config, onChange }) {
         value={config.mach_flight}
         onChange={(v) => onChange({ mach_flight: v })}
         min={0}
-        max={2.0}
+        max={5.0}
         step={0.05}
-        hint="M∞"
+        hint="M∞ (0-5)"
       />
     </fieldset>
   );
