@@ -2,6 +2,7 @@ import PerformanceSummary from "./PerformanceSummary.jsx";
 import StationTable from "./StationTable.jsx";
 import StageTable from "./StageTable.jsx";
 import TsDiagram from "./TsDiagram.jsx";
+import { useScrollReveal } from "../hooks/useScrollReveal.js";
 
 /**
  * The full results view for one solved EngineResult: overall performance
@@ -10,6 +11,7 @@ import TsDiagram from "./TsDiagram.jsx";
  */
 export default function ResultsPanel({ result }) {
   const { performance, nozzle, compressor, turbine, stations } = result;
+  const [tsRef, tsVisible] = useScrollReveal();
 
   return (
     <div className="results-panel">
@@ -41,7 +43,7 @@ export default function ResultsPanel({ result }) {
         </section>
       </div>
 
-      <section>
+      <section ref={tsRef} className={`reveal-on-scroll${tsVisible ? " is-visible" : ""}`}>
         <h2>T-s process diagram</h2>
         <TsDiagram stations={stations} />
         <p className="section-note">
