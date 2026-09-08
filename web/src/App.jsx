@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { defaultEngineConfig, solveEngine } from "./physics/engine.js";
 import ConfigForm from "./components/ConfigForm.jsx";
-import EngineDiagram from "./components/EngineDiagram.jsx";
 import ResultsPanel from "./components/ResultsPanel.jsx";
 import "./App.css";
 
@@ -59,10 +58,7 @@ function App() {
               </div>
             </div>
           ) : (
-            <>
-              <EngineDiagram config={config} result={result} />
-              <ResultsPanel result={result} />
-            </>
+            <ResultsPanel result={result} config={config} />
           )}
         </div>
       </main>
