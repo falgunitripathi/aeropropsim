@@ -75,7 +75,20 @@ const FLOW_X1 = STATIONS[STATIONS.length - 1].x;
 // Several thin lanes instead of one thick duct — reads as an actual
 // bundle of flow streamlines rather than a single fat pipe.
 const FLOW_LANE_OFFSETS = [-6, -2, 2, 6];
-const STREAKS_PER_LANE = 2;
+// Three overlapping streaks per lane (rather than two) means a new one is
+// always entering as the last one exits — no dead gap where the flow
+// looks like it has stopped moving.
+const STREAKS_PER_LANE = 3;
+
+// Part buttons — an explicit, always-visible way to inspect a component,
+// so nobody has to land a click on the small SVG shape itself.
+const PART_BUTTONS = [
+  { kind: "intake", label: "Intake" },
+  { kind: "compressor", label: "Compressor" },
+  { kind: "combustor", label: "Combustor" },
+  { kind: "turbine", label: "Turbine" },
+  { kind: "nozzle", label: "Nozzle" },
+];
 
 /** Axial stage bars — count capped visually at 6 so a 12-stage compressor doesn't overplot. */
 function StageBars({ x0, x1, count, growUp, className }) {
@@ -174,7 +187,7 @@ function FlowStreak({ y, index, count }) {
   const dur = 2.6;
   const delay = (index / count) * -dur;
   return (
-    <line x1="-16" y1="0" x2="0" y2="0" className="ed-flow-streak">
+    <line x1="-30" y1="0" x2="0" y2="0" className="ed-flow-streak">
       <animateMotion
         dur={`${dur}s`}
         begin={`${delay}s`}
@@ -189,6 +202,133 @@ function FlowStreak({ y, index, count }) {
         repeatCount="indefinite"
       />
     </line>
+  );
+}
+
+/**
+ * A continuously-scrolling marquee of stripes laid over each flow lane, on
+ * top of the individual streaks — the whole duct visibly conveys motion
+ * end to end rather than relying on the eye to track a few thin streaks.
+ */
+function FlowMarquee({ idSuffix }) {
+  return (
+    <pattern
+      id={`ed-flow-marquee-${idSuffix}`}
+      patternUnits="userSpaceOnUse"
+      width="16"
+      height="8"
+      patternTransform="translate(0 0)"
+    >
+      <rect width="16" height="8" fill="transparent" />
+      <rect x="0" y="0" width="8" height="8" fill="#ffffff" opacity="0.55" />
+      <animateTransform
+        attributeName="patternTransform"
+        type="translate"
+        from="0 0"
+        to="16 0"
+        dur="0.6s"
+        repeatCount="indefinite"
+      />
+    </pattern>
+  );
+}
+
+/**
+ * A machined-looking housing outline with a ring of bolts along its top
+ * and bottom edge — layered behind the spinning compressor/turbine glyph
+ * so that section reads as an actual bolted casing, not a bare shape.
+ */
+function HousingFlange({ x0, x1, yTop, yBot, boltCount = 6 }) {
+  const bolts = [];
+  for (let i = 0; i < boltCount; i++) {
+    const frac = (i + 0.5) / boltCount;
+    const x = x0 + frac * (x1 - x0);
+    bolts.push(<circle key={`t-${i}`} cx={x} cy={yTop} r="1.6" className="ed-bolt" />);
+    bolts.push(<circle key={`b-${i}`} cx={x} cy={yBot} r="1.6" className="ed-bolt" />);
+  }
+  return (
+    <>
+      <rect x={x0} y={yTop} width={x1 - x0} height={yBot - yTop} rx="8" className="ed-housing" />
+      {bolts}
+    </>
+  );
+}
+
+/**
+ * An explicit row of "Inspect" buttons — one per component — so a value
+ * card can be opened without needing to land a click on the small shape
+ * in the picture itself. Mirrors exactly what clicking the part does.
+ */
+function InspectToolbar({ activeKind, onSelect }) {
+  return (
+    <div className="ed-inspect-toolbar" role="group" aria-label="Inspect an engine part">
+      {PART_BUTTONS.map((p) => (
+        <button
+          key={p.kind}
+          type="button"
+          className={`ed-inspect-button${activeKind === p.kind ? " is-active" : ""}`}
+          onClick={() => onSelect(p.kind)}
+        >
+          {p.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * A small, single-series line chart of one value across all six stations —
+ * a proper graph with axes and a scale, not just a bigger picture. Shown
+ * only in the expanded view, where there's room for it alongside the
+ * enlarged diagram.
+ */
+function StationTrendChart({ title, values, unit, color, decimals = 0 }) {
+  const w = 280;
+  const h = 130;
+  const padL = 8;
+  const padR = 40;
+  const padT = 14;
+  const padB = 20;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const points = values.map((v, i) => {
+    const x = padL + (i / (values.length - 1)) * plotW;
+    const y = padT + plotH - ((v - min) / span) * plotH;
+    return [x, y];
+  });
+  const pathD = points.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const [lastX, lastY] = points[points.length - 1];
+
+  return (
+    <div className="ed-trend-card">
+      <p className="ed-trend-title">{title}</p>
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        className="ed-trend-svg"
+        role="img"
+        aria-label={`${title}: ${STATIONS.map((s, i) => `station ${s.key} ${fmt(values[i], decimals)} ${unit}`).join(", ")}`}
+      >
+        <line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} className="ed-trend-axis" />
+        <line x1={padL} y1={padT} x2={padL + plotW} y2={padT} className="ed-trend-gridline" />
+        <path d={pathD} className="ed-trend-line" stroke={color} />
+        {points.map(([x, y], i) => (
+          <circle key={STATIONS[i].key} cx={x} cy={y} r="4" fill={color} className="ed-trend-dot">
+            <title>{`St. ${STATIONS[i].key} — ${fmt(values[i], decimals)} ${unit}`}</title>
+          </circle>
+        ))}
+        <text x={lastX + 6} y={lastY + 4} textAnchor="start" className="ed-trend-endlabel">
+          {fmt(values[values.length - 1], decimals)} {unit}
+        </text>
+        {STATIONS.map((s, i) => (
+          <text key={s.key} x={points[i][0]} y={h - 4} textAnchor="middle" className="ed-trend-tick">
+            {s.key}
+          </text>
+        ))}
+      </svg>
+    </div>
   );
 }
 
@@ -356,9 +496,18 @@ function Diagram({ config, result, idSuffix }) {
   const isAxialTurbine = config.turbine_type === "axial";
   const isConvDi = config.nozzle_type === "conv-di";
 
+  const intakeMid = (SECTION.intake.x0 + SECTION.intake.x1) / 2;
   const compressorMid = (SECTION.compressor.x0 + SECTION.compressor.x1) / 2;
+  const combustorMid = (SECTION.combustor.x0 + SECTION.combustor.x1) / 2;
   const turbineMid = (SECTION.turbine.x0 + SECTION.turbine.x1) / 2;
   const nozzleMid = (SECTION.nozzle.x0 + SECTION.nozzle.x1) / 2;
+  const PART_MIDPOINTS = {
+    intake: intakeMid,
+    compressor: compressorMid,
+    combustor: combustorMid,
+    turbine: turbineMid,
+    nozzle: nozzleMid,
+  };
 
   const tValues = STATIONS.map((s) => stations[s.key].T0);
   const tMin = Math.min(...tValues);
@@ -372,13 +521,18 @@ function Diagram({ config, result, idSuffix }) {
   function selectPart(kind, xMid) {
     const details = partDetails(kind, result, config);
     if (!details) return;
-    setSelected({ details, leftPct: ((xMid + MARGIN) / TOTAL_W) * 100 });
+    setSelected({ details, leftPct: ((xMid + MARGIN) / TOTAL_W) * 100, kind });
+  }
+
+  function selectPartByKind(kind) {
+    selectPart(kind, PART_MIDPOINTS[kind]);
   }
 
   function selectStation(s) {
     setSelected({
       details: stationDetails(s.key, s.name, stations[s.key]),
       leftPct: ((s.x + MARGIN) / TOTAL_W) * 100,
+      kind: null,
     });
   }
 
@@ -395,7 +549,9 @@ function Diagram({ config, result, idSuffix }) {
   }
 
   return (
-    <div className="engine-diagram-scroll" onClick={handleWrapperClick}>
+    <div className="ed-diagram-wrap">
+      <InspectToolbar activeKind={selected?.kind ?? null} onSelect={selectPartByKind} />
+      <div className="engine-diagram-scroll" onClick={handleWrapperClick}>
       <svg
         viewBox={`${-MARGIN} 0 ${TOTAL_W} ${VBOX_H}`}
         className="engine-diagram-svg"
@@ -422,6 +578,7 @@ function Diagram({ config, result, idSuffix }) {
           <clipPath id={`ed-lower-half-${idSuffix}`}>
             <rect x={-800} y={CENTERLINE_Y} width="2000" height="400" />
           </clipPath>
+          <FlowMarquee idSuffix={idSuffix} />
         </defs>
 
         {/* Solid upper-half casing — the "closed" side of the cutaway */}
@@ -456,6 +613,13 @@ function Diagram({ config, result, idSuffix }) {
               width={SECTION.compressor.x1 - SECTION.compressor.x0}
               height="112"
               fill="transparent"
+            />
+            <HousingFlange
+              x0={SECTION.compressor.x0}
+              x1={SECTION.compressor.x1}
+              yTop={CENTERLINE_Y - 56}
+              yBot={CENTERLINE_Y + 56}
+              boltCount={6}
             />
             {isAxialCompressor ? (
               <>
@@ -503,6 +667,13 @@ function Diagram({ config, result, idSuffix }) {
               width={SECTION.turbine.x1 - SECTION.turbine.x0}
               height="112"
               fill="transparent"
+            />
+            <HousingFlange
+              x0={SECTION.turbine.x0}
+              x1={SECTION.turbine.x1}
+              yTop={CENTERLINE_Y - 56}
+              yBot={CENTERLINE_Y + 56}
+              boltCount={5}
             />
             {isAxialTurbine ? (
               <>
@@ -554,6 +725,17 @@ function Diagram({ config, result, idSuffix }) {
               opacity={i === 1 || i === 2 ? 0.65 : 0.35}
             />
           ))}
+          {FLOW_LANE_OFFSETS.map((dy, i) => (
+            <line
+              key={`marquee-${i}`}
+              x1={FLOW_X0}
+              y1={FLOW_Y + dy}
+              x2={FLOW_X1}
+              y2={FLOW_Y + dy}
+              className="ed-flow-marquee"
+              stroke={`url(#ed-flow-marquee-${idSuffix})`}
+            />
+          ))}
           {FLOW_LANE_OFFSETS.flatMap((dy, laneIdx) =>
             Array.from({ length: STREAKS_PER_LANE }, (_, j) => (
               <FlowStreak
@@ -595,12 +777,14 @@ function Diagram({ config, result, idSuffix }) {
       <PartCard details={selected?.details} leftPct={selected?.leftPct ?? 50} onClose={() => setSelected(null)} />
 
       <p className="section-note">
-        A live half-cutaway — click any part, or a station marker, to see
-        its numbers spelled out in plain English. Flow runs left to right:
-        near-white and cool at the intake, warming to red through the
-        compressor and combustor, cooling back down through the turbine
-        and nozzle. Compressor: {compressor.type}. Turbine: {turbine.type}.
+        A live half-cutaway — use the buttons above, or click any part or
+        station marker, to see its numbers spelled out in plain English.
+        Flow runs left to right: near-white and cool at the intake, warming
+        to red through the compressor and combustor, cooling back down
+        through the turbine and nozzle. Compressor: {compressor.type}.
+        Turbine: {turbine.type}.
       </p>
+      </div>
     </div>
   );
 }
@@ -657,6 +841,23 @@ export default function EngineDiagram({ config, result }) {
             </div>
             <div className="engine-diagram-scroll-big">
               <Diagram config={config} result={result} idSuffix="modal" />
+            </div>
+
+            <div className="ed-trends">
+              <StationTrendChart
+                title="Stagnation temperature across stations"
+                values={STATIONS.map((s) => result.stations[s.key].T0)}
+                unit="K"
+                color="#ff6f61"
+                decimals={0}
+              />
+              <StationTrendChart
+                title="Stagnation pressure across stations"
+                values={STATIONS.map((s) => result.stations[s.key].p0 / 1000)}
+                unit="kPa"
+                color="#2a78d6"
+                decimals={0}
+              />
             </div>
           </div>
         </div>
