@@ -1,4 +1,21 @@
-import { fmt, fmtPct, tsfcPerHour } from "../utils/format.js";
+import { fmt, tsfcPerHour } from "../utils/format.js";
+import { useAnimatedNumber } from "../hooks/useAnimatedNumber.js";
+
+/** A headline number that glides to its new value instead of jumping. */
+function Stat({ value, digits = 2, unit }) {
+  const shown = useAnimatedNumber(value);
+  return (
+    <span className="perf-value">
+      {fmt(shown, digits)} {unit && <small>{unit}</small>}
+    </span>
+  );
+}
+
+/** Same, formatted as a percentage (value is a 0-1 ratio, or null). */
+function PctStat({ value }) {
+  const shown = useAnimatedNumber(value === null || value === undefined ? NaN : value * 100);
+  return <span className="perf-value">{Number.isFinite(shown) ? `${fmt(shown, 1)}%` : "—"}</span>;
+}
 
 /**
  * Headline overall-performance numbers — Ref §9 (Overall Performance).
@@ -11,31 +28,31 @@ export default function PerformanceSummary({ performance, nozzle }) {
     <div className="performance-summary">
       <div className="perf-card">
         <span className="perf-label">Thrust</span>
-        <span className="perf-value">{fmt(performance.thrust, 1)} <small>N</small></span>
+        <Stat value={performance.thrust} digits={1} unit="N" />
       </div>
       <div className="perf-card">
         <span className="perf-label">Specific thrust</span>
-        <span className="perf-value">{fmt(performance.specific_thrust, 2)} <small>N·s/kg</small></span>
+        <Stat value={performance.specific_thrust} digits={2} unit="N·s/kg" />
       </div>
       <div className="perf-card">
         <span className="perf-label">TSFC</span>
-        <span className="perf-value">{fmt(tsfcHr, 3)} <small>kg/(N·h)</small></span>
+        <Stat value={tsfcHr} digits={3} unit="kg/(N·h)" />
       </div>
       <div className="perf-card">
         <span className="perf-label">Fuel-air ratio f</span>
-        <span className="perf-value">{fmt(performance.f, 4)}</span>
+        <Stat value={performance.f} digits={4} />
       </div>
       <div className="perf-card">
         <span className="perf-label">Thermal efficiency</span>
-        <span className="perf-value">{fmtPct(performance.eta_thermal)}</span>
+        <PctStat value={performance.eta_thermal} />
       </div>
       <div className="perf-card">
         <span className="perf-label">Propulsive efficiency</span>
-        <span className="perf-value">{fmtPct(performance.eta_propulsive)}</span>
+        <PctStat value={performance.eta_propulsive} />
       </div>
       <div className="perf-card">
         <span className="perf-label">Overall efficiency</span>
-        <span className="perf-value">{fmtPct(performance.eta_overall)}</span>
+        <PctStat value={performance.eta_overall} />
       </div>
       <div className="perf-card">
         <span className="perf-label">Nozzle</span>
