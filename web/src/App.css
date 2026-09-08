@@ -208,6 +208,17 @@
   margin: 8px 0 0;
 }
 
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .error-banner {
   background: var(--error-bg);
   border: 1px solid var(--error-border);
@@ -419,6 +430,40 @@
   stroke: var(--ed-flame);
   stroke-width: 2.5;
   stroke-linecap: round;
+  animation: ed-flame-flicker 1.6s ease-in-out infinite;
+}
+
+@keyframes ed-flame-flicker {
+  0%, 100% { opacity: 0.72; }
+  50% { opacity: 1; }
+}
+
+.ed-casing {
+  fill: var(--ed-casing);
+  stroke: var(--ed-casing-line);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.ed-axis {
+  stroke: var(--text-muted);
+  stroke-width: 1.25;
+  stroke-dasharray: 16 4 2 4;
+  opacity: 0.6;
+}
+
+.ed-flow-duct {
+  stroke: url(#ed-heat-flow);
+  stroke-width: 9;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.ed-particle {
+  fill: #fffaf2;
+  stroke: rgba(255, 111, 97, 0.35);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 2px rgba(255, 179, 122, 0.7));
 }
 
 .ed-turbine {
