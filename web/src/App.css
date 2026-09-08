@@ -5,21 +5,23 @@
 }
 
 .app-header {
-  padding: 24px 32px 16px;
+  padding: 28px 32px 20px;
   border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--accent-bg), transparent 140%);
 }
 
 .app-header h1 {
   margin: 0 0 6px;
-  font-size: 28px;
-  letter-spacing: -0.4px;
+  font-size: 32px;
+  letter-spacing: -0.5px;
 }
 
 .app-subtitle {
   margin: 0;
-  max-width: 72ch;
+  max-width: 68ch;
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
 }
 
 .app-main {
@@ -72,11 +74,12 @@
 .reset-button {
   background: none;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 10px;
+  border-radius: 999px;
+  padding: 5px 12px;
   font-size: 12px;
   cursor: pointer;
   color: var(--text-muted);
+  transition: border-color 0.15s, color 0.15s;
 }
 
 .reset-button:hover {
@@ -87,7 +90,7 @@
 .config-section {
   border: none;
   border-bottom: 1px solid var(--border);
-  padding: 12px 0;
+  padding: 14px 0;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -95,12 +98,13 @@
 }
 
 .config-section legend {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
   padding: 0;
+  font-family: var(--display);
 }
 
 .config-section.advanced {
@@ -112,10 +116,11 @@
   border: none;
   padding: 0;
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-family: var(--display);
   color: var(--text-muted);
   cursor: pointer;
 }
@@ -157,17 +162,19 @@
 
 .field input,
 .field select {
-  padding: 6px 8px;
-  border-radius: 6px;
+  padding: 7px 9px;
+  border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--bg-panel);
   color: var(--text-h);
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .field input:focus,
 .field select:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 .field input:disabled,
@@ -192,6 +199,7 @@
   letter-spacing: 0.05em;
   color: var(--text-muted);
   margin: 0 0 12px;
+  font-family: var(--display);
 }
 
 .section-note {
@@ -204,12 +212,27 @@
   background: var(--error-bg);
   border: 1px solid var(--error-border);
   color: var(--error-text);
-  border-radius: 8px;
-  padding: 16px 18px;
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 60ch;
+}
+
+.error-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.error-banner strong {
+  font-family: var(--display);
+  font-size: 16px;
 }
 
 .error-banner p {
   margin: 6px 0 0;
+  line-height: 1.5;
 }
 
 .performance-summary {
@@ -221,8 +244,8 @@
 .perf-card {
   background: var(--bg-panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 14px;
+  border-radius: 12px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -235,21 +258,24 @@
 }
 
 .perf-value {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 21px;
+  font-weight: 800;
+  font-family: var(--display);
   color: var(--text-h);
+  font-variant-numeric: tabular-nums;
 }
 
 .perf-value small {
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 500;
+  font-family: var(--sans);
   color: var(--text-muted);
 }
 
 .table-scroll {
   overflow-x: auto;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .station-table,
@@ -307,7 +333,7 @@
 .ts-diagram {
   background: var(--bg-panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 12px;
   max-width: 620px;
 }
@@ -334,4 +360,145 @@
 .ts-point-label {
   fill: var(--text-h);
   font-size: 11px;
+}
+
+/* --- Engine diagram --- */
+
+.engine-diagram {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+}
+
+.engine-diagram-scroll {
+  overflow-x: auto;
+}
+
+.engine-diagram-svg {
+  display: block;
+  width: 100%;
+  min-width: 720px;
+  height: auto;
+}
+
+.ed-centerline {
+  stroke: var(--border);
+  stroke-width: 2;
+}
+
+.ed-guide {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+.ed-intake {
+  fill: var(--code-bg);
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+  transition: d 0.3s;
+}
+
+.ed-compressor {
+  fill: var(--ed-compressor);
+  stroke: none;
+  transition: fill 0.3s;
+}
+
+.ed-combustor {
+  fill: var(--error-bg);
+  stroke: var(--ed-flame);
+  stroke-width: 1.5;
+}
+
+.ed-flame {
+  fill: none;
+  stroke: var(--ed-flame);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.ed-turbine {
+  fill: var(--ed-turbine);
+  stroke: none;
+  transition: fill 0.3s;
+}
+
+.ed-nozzle {
+  fill: var(--code-bg);
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+
+.ed-spoke {
+  stroke: var(--bg-panel);
+  stroke-width: 2;
+}
+
+.ed-hub {
+  fill: var(--bg-panel);
+}
+
+.station-readouts {
+  position: relative;
+  width: 100%;
+  min-width: 720px;
+  height: 78px;
+  margin-top: 4px;
+}
+
+.station-readout {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.station-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.station-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.station-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.station-name {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.station-num {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+}
+
+.station-num-muted {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
 }
