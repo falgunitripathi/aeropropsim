@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aeropropsim"
+version = "0.1.0"
+description = "Interactive multi-stage gas-turbine (turbojet) performance simulator — Phase 1 engineering core"
+authors = [{ name = "Shivanshu", email = "shivanshu@codecarbonhq.com" }]
+requires-python = ">=3.9"
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools]
+packages = ["aeropropsim"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
