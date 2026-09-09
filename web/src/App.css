@@ -922,3 +922,182 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Phase 2: parameter sweep --- */
+
+.sweep-controls {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 0.8fr auto;
+  gap: 10px 14px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 900px) {
+  .sweep-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sweep-export-button {
+  height: 34px;
+  white-space: nowrap;
+}
+
+.sweep-charts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .sweep-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sweep-chart-card {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px 10px;
+}
+
+.sweep-chart-title {
+  font-family: var(--display);
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.sweep-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sweep-chart-axis {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+}
+
+.sweep-chart-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.sweep-chart-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sweep-chart-dot {
+  stroke: var(--bg-panel);
+  stroke-width: 2;
+}
+
+.sweep-chart-tick {
+  fill: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.sweep-chart-endlabel {
+  fill: var(--text-h);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Phase 2: save & compare configurations --- */
+
+.compare-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.save-config-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.save-config-input {
+  flex: 1 1 260px;
+  min-width: 180px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-h);
+  font-size: 13px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.save-config-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.compare-table-scroll {
+  margin-bottom: 4px;
+}
+
+.compare-table {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.compare-table th:first-child,
+.compare-table td:first-child {
+  text-align: left;
+}
+
+.compare-table thead th {
+  background: var(--code-bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.compare-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.compare-name {
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+.compare-remove-button {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.compare-remove-button:hover {
+  border-color: var(--error-border);
+  color: var(--error-text);
+}
