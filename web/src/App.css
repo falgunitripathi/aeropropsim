@@ -283,6 +283,18 @@
   color: var(--text-muted);
 }
 
+.atmosphere-readout {
+  margin-top: 10px;
+}
+
+.atmosphere-readout .perf-card {
+  padding: 12px 16px;
+}
+
+.atmosphere-readout .perf-value {
+  font-size: 17px;
+}
+
 .table-scroll {
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -1018,6 +1030,83 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* --- Tornado diagram (local sensitivity) --- */
+
+.tornado-chart {
+  margin-top: 8px;
+}
+
+.tornado-legend {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tornado-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tornado-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.tornado-swatch-low {
+  background: #2a78d6;
+}
+
+.tornado-swatch-high {
+  background: #eb6834;
+}
+
+.tornado-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tornado-zero-line {
+  stroke: var(--text-muted);
+  stroke-width: 1;
+}
+
+.tornado-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.tornado-tick {
+  fill: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.tornado-row-label {
+  fill: var(--text);
+  font-size: 12px;
+}
+
+.tornado-bar-low {
+  fill: #2a78d6;
+}
+
+.tornado-bar-high {
+  fill: #eb6834;
+}
+
+.tornado-value-label {
+  fill: var(--text-h);
+  font-size: 10.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- Phase 2: save & compare configurations --- */
 
 .compare-wrap {
@@ -1172,6 +1261,52 @@
 
 .validation-summary.is-fail {
   color: var(--error-text);
+}
+
+/* --- Mission analysis (segment editor table) --- */
+
+.mission-table {
+  font-size: 13px;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.mission-table th,
+.mission-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.mission-table thead th {
+  background: var(--code-bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mission-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.mission-table input {
+  width: 100%;
+  min-width: 70px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  color: var(--text-h);
+  font-size: 13px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.mission-table input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
 }
 
 /* --- Phase 3: assumptions panel --- */
