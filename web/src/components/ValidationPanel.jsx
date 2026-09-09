@@ -7,6 +7,7 @@ import {
   criticalPressure, isChoked, chokedExitTemperatureGanesanConvention,
   chokedExitVelocity, thrust as nozzleThrust,
 } from "../physics/nozzle.js";
+import ExpandableSection from "./ExpandableSection.jsx";
 import { fmt } from "../utils/format.js";
 
 // --- Ganesan, "Gas Turbines" 3rd ed. (Tata McGraw Hill), Worked Example 7.5,
@@ -30,24 +31,9 @@ const CP_G = 1147.0;
 const GAMMA_G = 1.33;
 const R_G = (CP_G * (GAMMA_G - 1.0)) / GAMMA_G;
 
-const GIVEN_INPUTS = [
-  ["Ambient pressure p_a", "0.458 bar"],
-  ["Ambient temperature T_a", "248 K"],
-  ["Flight speed", "805 km/h"],
-  ["Compressor pressure ratio π_c", "4.0"],
-  ["Combustor pressure loss Δp_cc", "0.21 bar"],
-  ["Turbine inlet temperature (TIT)", "1100 K"],
-  ["Ram / diffuser efficiency η_d", "0.95"],
-  ["Compressor efficiency η_c", "0.85"],
-  ["Turbine efficiency η_t", "0.90"],
-  ["Mechanical efficiency η_m", "0.99"],
-  ["Nozzle efficiency η_N", "0.95"],
-  ["Nozzle exit area", "0.0935 m²"],
-];
-
 /**
  * Runs the textbook's own worked example through this project's *actual*
- * shipped physics functions (the same ones the rest of the app calls) and
+ * shipped physics functions (the same ones the rest of the app uses) and
  * compares every published intermediate and final number against the
  * book. This mirrors `tests/test_validation_ganesan_example_7_5.py` and
  * `web/scripts/parity_check.mjs`, but recomputed live, in the browser,
@@ -86,23 +72,23 @@ function runGanesanValidation() {
   const f_book_equivalent = 0.263 / 14.67;
 
   return [
-    { label: "T02 — compressor inlet stagnation temp (book T01)", got: T02, want: 272.87, tol: 0.05, unit: " K" },
-    { label: "p01 — compressor inlet stagnation pressure", got: p01 / 1e5, want: 0.631, tol: 0.001, unit: " bar" },
-    { label: "T03 — compressor exit stagnation temp (book T02)", got: T03, want: 429.08, tol: 0.3, unit: " K" },
-    { label: "p02 — compressor exit stagnation pressure", got: p02 / 1e5, want: 2.524, tol: 0.01, unit: " bar" },
-    { label: "T04 — turbine exit stagnation temp (book T04)", got: T04, want: 961.75, tol: 0.5, unit: " K" },
-    { label: "p03 — combustor exit stagnation pressure", got: p03 / 1e5, want: 2.31, tol: 0.01, unit: " bar" },
-    { label: "p04 — nozzle inlet stagnation pressure", got: p04 / 1e5, want: 1.26, tol: 0.01, unit: " bar" },
-    { label: "Nozzle choking", got: choked ? 1 : 0, want: 1, tol: 0, unit: "", display: choked ? "Choked" : "Unchoked", displayWant: "Choked" },
-    { label: "T_exit — choked nozzle exit temperature", got: T_exit, want: 818.35, tol: 0.3, unit: " K" },
+    { label: "T02 — compressor inlet stag. temp", got: T02, want: 272.87, tol: 0.05, unit: " K" },
+    { label: "p01 — compressor inlet stag. pressure", got: p01 / 1e5, want: 0.631, tol: 0.001, unit: " bar" },
+    { label: "T03 — compressor exit stag. temp", got: T03, want: 429.08, tol: 0.3, unit: " K" },
+    { label: "p02 — compressor exit stag. pressure", got: p02 / 1e5, want: 2.524, tol: 0.01, unit: " bar" },
+    { label: "T04 — turbine exit stag. temp", got: T04, want: 961.75, tol: 0.5, unit: " K" },
+    { label: "p03 — combustor exit stag. pressure", got: p03 / 1e5, want: 2.31, tol: 0.01, unit: " bar" },
+    { label: "p04 — nozzle inlet stag. pressure", got: p04 / 1e5, want: 1.26, tol: 0.01, unit: " bar" },
+    { label: "Nozzle choking", got: choked ? 1 : 0, want: 1, tol: 0, unit: "", display: choked ? "Choked" : "Unchoked", displayWant: "Choked", noError: true },
+    { label: "T_exit — choked nozzle exit temp", got: T_exit, want: 818.35, tol: 0.3, unit: " K" },
     { label: "V_exit — nozzle exit velocity", got: V_exit, want: 556.56, tol: 0.5, unit: " m/s" },
-    { label: "ṁ_a — air mass flow (back-solved from exit area)", got: mdot_a, want: 14.67, tol: 14.67 * 0.005, unit: " kg/s" },
+    { label: "ṁ_a — air mass flow (back-solved)", got: mdot_a, want: 14.67, tol: 14.67 * 0.005, unit: " kg/s" },
     { label: "Thrust F", got: F, want: 6745.17, tol: 6745.17 * 0.01, unit: " N" },
-    { label: "SFC (linear estimate, matches book's own formula)", got: sfc, want: 0.14, tol: 0.14 * 0.02, unit: " kg/(N·h)" },
+    { label: "SFC (book's linear estimate)", got: sfc, want: 0.14, tol: 0.14 * 0.02, unit: " kg/(N·h)" },
     {
-      label: "f — rigorous energy-balance fuel-air ratio",
+      label: "f — fuel-air ratio",
       got: f_rigorous, want: f_book_equivalent, tol: f_book_equivalent * 0.15, unit: "",
-      note: "Book uses the simplified linear estimate (f≈0.0179); this project's default combustor.fuelAirRatio uses the fuller energy balance — the two differ by ~11%, a documented simplification difference, not a bug (see README).",
+      note: "differs by ~11% because this project's default fuelAirRatio uses a fuller energy balance, while the book uses a simplified linear estimate — a documented methodology difference, not a bug.",
     },
   ];
 }
@@ -110,53 +96,42 @@ function runGanesanValidation() {
 export default function ValidationPanel() {
   const rows = useMemo(() => runGanesanValidation(), []);
   const allPass = rows.every((r) => Math.abs(r.got - r.want) <= (r.tol || 1e-9));
+  const noteRow = rows.find((r) => r.note);
 
   return (
-    <section>
-      <h2>Validation against a published textbook example</h2>
-      <p className="section-note">
-        This isn&rsquo;t a claim about the current configuration in the
-        form on the left — it&rsquo;s an independent, external check that
-        the physics code itself is correct. The numbers below are computed
-        live, right now, in your browser, by calling the exact same
-        physics functions the rest of this app uses — fed with the inputs
-        from V. Ganesan, <em>Gas Turbines</em>, 3rd ed. (Tata McGraw
-        Hill), Worked Example 7.5 (pp.258&ndash;261), and compared against
-        that book&rsquo;s own published answers.
-      </p>
-      <details className="glossary">
-        <summary>Textbook inputs used for this check</summary>
-        <div className="glossary-list">
-          {GIVEN_INPUTS.map(([label, value]) => (
-            <div className="glossary-row" key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </div>
-      </details>
+    <ExpandableSection
+      title="Validation vs. published textbook"
+      summary={`14-quantity check against V. Ganesan, Gas Turbines, Worked Example 7.5 — ${allPass ? "all match" : "see mismatches"}. Expand for the full table.`}
+    >
       <div className="table-scroll">
         <table className="validation-table">
           <thead>
             <tr>
-              <th>Quantity</th>
-              <th>Computed here</th>
-              <th>Published in book</th>
-              <th>Result</th>
+              <th>Parameter</th>
+              <th>ThrustForge</th>
+              <th>Reference</th>
+              <th>Error</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => {
               const ok = Math.abs(r.got - r.want) <= (r.tol || 1e-9);
+              const errorPct = r.want !== 0 ? ((r.got - r.want) / r.want) * 100 : 0;
               return (
                 <tr key={r.label}>
                   <td>{r.label}</td>
                   <td>{r.display || `${fmt(r.got, 3)}${r.unit}`}</td>
                   <td>{r.displayWant || `${fmt(r.want, 3)}${r.unit}`}</td>
                   <td>
-                    <span className={`validation-badge${ok ? " is-pass" : " is-fail"}`}>
-                      {ok ? "Match" : "Mismatch"}
-                    </span>
+                    {r.noError ? (
+                      <span className={`validation-badge${ok ? " is-pass" : " is-fail"}`}>
+                        {ok ? "Match" : "Mismatch"}
+                      </span>
+                    ) : (
+                      <span className={`validation-badge${ok ? " is-pass" : " is-fail"}`}>
+                        {errorPct >= 0 ? "+" : ""}{fmt(errorPct, 2)}%
+                      </span>
+                    )}
                   </td>
                 </tr>
               );
@@ -166,12 +141,14 @@ export default function ValidationPanel() {
       </div>
       <p className={`validation-summary${allPass ? " is-pass" : " is-fail"}`}>
         {allPass
-          ? "All 14 checks match the published textbook example."
-          : "Some checks did not match — see the table above."}
+          ? "All 14 quantities match the published textbook example within tolerance."
+          : "Some quantities fell outside tolerance — see the table above."}
       </p>
-      {rows.some((r) => r.note) && (
-        <p className="section-note">{rows.find((r) => r.note).note}</p>
+      {noteRow && (
+        <p className="section-note">
+          The one notable discrepancy, {noteRow.label}, {noteRow.note}
+        </p>
       )}
-    </section>
+    </ExpandableSection>
   );
 }
