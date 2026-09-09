@@ -23,6 +23,7 @@ function ticks(lo, hi, count) {
  */
 export default function SweepChart({
   title, xValues, yValues, unit, color, decimals = 1, xUnit, xDecimals = 1,
+  bestIndex = null,
 }) {
   const known = yValues.filter((v) => v !== null && v !== undefined && Number.isFinite(v));
   if (known.length === 0) {
@@ -118,7 +119,7 @@ export default function SweepChart({
             </circle>
           );
         })}
-        {lastKnownIdx >= 0 && (
+        {lastKnownIdx >= 0 && bestIndex !== lastKnownIdx && (
           <text
             className="sweep-chart-endlabel"
             x={px(xValues[lastKnownIdx]) - 6}
@@ -127,6 +128,24 @@ export default function SweepChart({
           >
             {yValues[lastKnownIdx].toFixed(decimals)}{unit ? ` ${unit}` : ""}
           </text>
+        )}
+        {bestIndex !== null && bestIndex !== undefined && Number.isFinite(yValues[bestIndex]) && (
+          <>
+            <circle
+              className="sweep-chart-best-ring"
+              cx={px(xValues[bestIndex])}
+              cy={py(yValues[bestIndex])}
+              r={7}
+            />
+            <text
+              className="sweep-chart-best-label"
+              x={px(xValues[bestIndex])}
+              y={py(yValues[bestIndex]) - 12}
+              textAnchor="middle"
+            >
+              best: {yValues[bestIndex].toFixed(decimals)}{unit ? ` ${unit}` : ""}
+            </text>
+          </>
         )}
       </svg>
     </div>
