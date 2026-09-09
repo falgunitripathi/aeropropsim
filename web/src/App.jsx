@@ -16,6 +16,7 @@ import "./App.css";
  */
 function App() {
   const [config, setConfig] = useState(defaultEngineConfig());
+  const [savedConfigs, setSavedConfigs] = useState([]);
 
   const patchConfig = (patch) => setConfig((prev) => ({ ...prev, ...patch }));
   const resetConfig = () => setConfig(defaultEngineConfig());
@@ -27,6 +28,18 @@ function App() {
       return { result: null, error: err.message || String(err) };
     }
   }, [config]);
+
+  // Phase 2 — save & compare: each snapshot freezes the config AND its
+  // already-solved result at save time, so later tweaks to the live
+  // config never retroactively change a saved comparison row.
+  const saveConfig = (name) => {
+    if (!result) return;
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setSavedConfigs((prev) => [...prev, { id, name, config, result }]);
+  };
+  const removeConfig = (id) => {
+    setSavedConfigs((prev) => prev.filter((s) => s.id !== id));
+  };
 
   return (
     <div className="app-shell">
@@ -58,7 +71,13 @@ function App() {
               </div>
             </div>
           ) : (
-            <ResultsPanel result={result} config={config} />
+            <ResultsPanel
+              result={result}
+              config={config}
+              savedConfigs={savedConfigs}
+              onSaveConfig={saveConfig}
+              onRemoveConfig={removeConfig}
+            />
           )}
         </div>
       </main>
