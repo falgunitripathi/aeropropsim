@@ -2,6 +2,7 @@ import PerformanceSummary from "./PerformanceSummary.jsx";
 import StationTable from "./StationTable.jsx";
 import StageTable from "./StageTable.jsx";
 import TsDiagram from "./TsDiagram.jsx";
+import PvDiagram from "./PvDiagram.jsx";
 import EngineDiagram from "./EngineDiagram.jsx";
 import Glossary from "./Glossary.jsx";
 import ParameterSweep from "./ParameterSweep.jsx";
@@ -9,8 +10,9 @@ import SensitivityOptimizer from "./SensitivityOptimizer.jsx";
 import ConfigCompare from "./ConfigCompare.jsx";
 import ValidationPanel from "./ValidationPanel.jsx";
 import AssumptionsPanel from "./AssumptionsPanel.jsx";
+import IdealVsReal from "./IdealVsReal.jsx";
 import ReportExport from "./ReportExport.jsx";
-import { useScrollReveal } from "../hooks/useScrollReveal.js";
+import ExpandableSection from "./ExpandableSection.jsx";
 import { fmt } from "../utils/format.js";
 
 const STATION_TERMS = [
@@ -43,7 +45,6 @@ const STAGE_TERMS = [
  */
 export default function ResultsPanel({ result, config, savedConfigs, onSaveConfig, onRemoveConfig }) {
   const { performance, nozzle, compressor, turbine, stations } = result;
-  const [tsRef, tsVisible] = useScrollReveal();
 
   return (
     <div className="results-panel">
@@ -98,18 +99,34 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
         </section>
       </div>
 
-      <section ref={tsRef} className={`reveal-on-scroll${tsVisible ? " is-visible" : ""}`}>
-        <h2>T-s process diagram</h2>
-        <TsDiagram stations={stations} />
-        <p className="section-note">
-          Approximate — see <code>TsDiagram.jsx</code> for the entropy-datum
-          caveat across the combustor.
-        </p>
-      </section>
+      <ExpandableSection
+        title="Cycle diagrams"
+        summary="T-s (temperature-entropy) and P-v (pressure-specific volume) process diagrams across stations a→2→3→4→5→9. Expand to view."
+      >
+        <div className="stage-tables-row">
+          <div>
+            <h3>T-s diagram</h3>
+            <TsDiagram stations={stations} />
+            <p className="section-note">
+              Approximate — see <code>TsDiagram.jsx</code> for the
+              entropy-datum caveat across the combustor.
+            </p>
+          </div>
+          <div>
+            <h3>P-v diagram</h3>
+            <PvDiagram stations={stations} />
+            <p className="section-note">
+              Static pressure vs. specific volume (v = 1/ρ) at each station.
+            </p>
+          </div>
+        </div>
+      </ExpandableSection>
 
       <ParameterSweep config={config} />
 
       <SensitivityOptimizer config={config} />
+
+      <IdealVsReal config={config} result={result} />
 
       <ValidationPanel />
 
