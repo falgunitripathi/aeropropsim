@@ -1101,3 +1101,197 @@
   border-color: var(--error-border);
   color: var(--error-text);
 }
+
+/* --- Phase 3: report export --- */
+.report-export {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* --- Phase 3: validation panel --- */
+.validation-table {
+  font-size: 13px;
+}
+
+.validation-table th,
+.validation-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.validation-table th:first-child,
+.validation-table td:first-child {
+  text-align: left;
+}
+
+.validation-table thead th {
+  background: var(--code-bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.validation-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.validation-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.validation-badge.is-pass {
+  background: rgba(27, 175, 123, 0.12);
+  color: #1a8f66;
+}
+
+.validation-badge.is-fail {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+.validation-summary {
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.validation-summary.is-pass {
+  color: #1a8f66;
+}
+
+.validation-summary.is-fail {
+  color: var(--error-text);
+}
+
+/* --- Phase 3: assumptions panel --- */
+.assumptions-table {
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.assumptions-table th,
+.assumptions-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.assumptions-table th:first-child,
+.assumptions-table td:first-child {
+  text-align: left;
+}
+
+.assumptions-table thead th {
+  background: var(--code-bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.assumptions-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.assumptions-item {
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-panel);
+}
+
+.assumptions-item dt {
+  font-weight: 700;
+  color: var(--text-h);
+  font-family: var(--display);
+  font-size: 13.5px;
+  margin-bottom: 3px;
+}
+
+.assumptions-item dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* --- Phase 3: sensitivity / optimization --- */
+.optimize-best-card {
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 10px 0 16px;
+}
+
+.optimize-best-title {
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--text-h);
+  font-size: 13.5px;
+  margin-bottom: 4px;
+}
+
+.optimize-best-where {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.optimize-best-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.optimize-best-stats strong {
+  color: var(--text-h);
+  margin-right: 4px;
+}
+
+.optimize-chart-wrap {
+  max-width: 340px;
+}
+
+.heatmap-wrap {
+  overflow-x: auto;
+}
+
+.heatmap-svg {
+  max-width: 100%;
+}
+
+.heatmap-tick {
+  font-size: 9.5px;
+  fill: var(--text-muted);
+}
+
+.heatmap-axis-label {
+  font-size: 10.5px;
+  fill: var(--text-muted);
+}
+
+/* --- Sweep chart: best-point marker (shared by Sensitivity & optimization) --- */
+.sweep-chart-best-ring {
+  fill: none;
+  stroke: var(--text-h);
+  stroke-width: 2;
+}
+
+.sweep-chart-best-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  fill: var(--text-h);
+}
