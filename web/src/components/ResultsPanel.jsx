@@ -1,4 +1,5 @@
 import PerformanceSummary from "./PerformanceSummary.jsx";
+import AtmosphereReadout from "./AtmosphereReadout.jsx";
 import StationTable from "./StationTable.jsx";
 import StageTable from "./StageTable.jsx";
 import TsDiagram from "./TsDiagram.jsx";
@@ -7,10 +8,13 @@ import EngineDiagram from "./EngineDiagram.jsx";
 import Glossary from "./Glossary.jsx";
 import ParameterSweep from "./ParameterSweep.jsx";
 import SensitivityOptimizer from "./SensitivityOptimizer.jsx";
+import TornadoSensitivity from "./TornadoSensitivity.jsx";
 import ConfigCompare from "./ConfigCompare.jsx";
 import ValidationPanel from "./ValidationPanel.jsx";
 import AssumptionsPanel from "./AssumptionsPanel.jsx";
 import IdealVsReal from "./IdealVsReal.jsx";
+import EngineSizing from "./EngineSizing.jsx";
+import MissionAnalysis from "./MissionAnalysis.jsx";
 import ReportExport from "./ReportExport.jsx";
 import ExpandableSection from "./ExpandableSection.jsx";
 import { fmt } from "../utils/format.js";
@@ -51,6 +55,13 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
       <section>
         <h2>Overall performance</h2>
         <PerformanceSummary performance={performance} nozzle={nozzle} />
+        <h3>Atmosphere at this altitude</h3>
+        <p className="section-note">
+          ISA troposphere values at the configured altitude and flight
+          Mach number — computed once here, then reused throughout (intake,
+          nozzle, all sweeps below).
+        </p>
+        <AtmosphereReadout config={config} result={result} />
         <ReportExport config={config} result={result} />
       </section>
 
@@ -126,7 +137,13 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
 
       <SensitivityOptimizer config={config} />
 
+      <TornadoSensitivity config={config} result={result} />
+
       <IdealVsReal config={config} result={result} />
+
+      <EngineSizing config={config} result={result} />
+
+      <MissionAnalysis config={config} />
 
       <ValidationPanel />
 
@@ -143,3 +160,4 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
     </div>
   );
 }
+
