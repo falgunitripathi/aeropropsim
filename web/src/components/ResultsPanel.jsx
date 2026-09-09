@@ -4,6 +4,8 @@ import StageTable from "./StageTable.jsx";
 import TsDiagram from "./TsDiagram.jsx";
 import EngineDiagram from "./EngineDiagram.jsx";
 import Glossary from "./Glossary.jsx";
+import ParameterSweep from "./ParameterSweep.jsx";
+import ConfigCompare from "./ConfigCompare.jsx";
 import { useScrollReveal } from "../hooks/useScrollReveal.js";
 import { fmt } from "../utils/format.js";
 
@@ -35,7 +37,7 @@ const STAGE_TERMS = [
  * architecture choices (axial/centrifugal, blade tip speed) alongside the
  * solved numbers.
  */
-export default function ResultsPanel({ result, config }) {
+export default function ResultsPanel({ result, config, savedConfigs, onSaveConfig, onRemoveConfig }) {
   const { performance, nozzle, compressor, turbine, stations } = result;
   const [tsRef, tsVisible] = useScrollReveal();
 
@@ -98,6 +100,17 @@ export default function ResultsPanel({ result, config }) {
           Approximate — see <code>TsDiagram.jsx</code> for the entropy-datum
           caveat across the combustor.
         </p>
+      </section>
+
+      <ParameterSweep config={config} />
+
+      <section>
+        <h2>Saved configurations</h2>
+        <p className="section-note">
+          Snapshot the current configuration and its results, then compare
+          several side by side.
+        </p>
+        <ConfigCompare savedConfigs={savedConfigs} onSave={onSaveConfig} onRemove={onRemoveConfig} />
       </section>
     </div>
   );
