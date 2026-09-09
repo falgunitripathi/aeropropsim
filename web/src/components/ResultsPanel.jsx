@@ -5,7 +5,11 @@ import TsDiagram from "./TsDiagram.jsx";
 import EngineDiagram from "./EngineDiagram.jsx";
 import Glossary from "./Glossary.jsx";
 import ParameterSweep from "./ParameterSweep.jsx";
+import SensitivityOptimizer from "./SensitivityOptimizer.jsx";
 import ConfigCompare from "./ConfigCompare.jsx";
+import ValidationPanel from "./ValidationPanel.jsx";
+import AssumptionsPanel from "./AssumptionsPanel.jsx";
+import ReportExport from "./ReportExport.jsx";
 import { useScrollReveal } from "../hooks/useScrollReveal.js";
 import { fmt } from "../utils/format.js";
 
@@ -46,6 +50,7 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
       <section>
         <h2>Overall performance</h2>
         <PerformanceSummary performance={performance} nozzle={nozzle} />
+        <ReportExport config={config} result={result} />
       </section>
 
       <EngineDiagram config={config} result={result} />
@@ -103,6 +108,12 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
       </section>
 
       <ParameterSweep config={config} />
+
+      <SensitivityOptimizer config={config} />
+
+      <ValidationPanel />
+
+      <AssumptionsPanel config={config} />
 
       <section>
         <h2>Saved configurations</h2>
