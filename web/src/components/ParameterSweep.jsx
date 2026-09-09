@@ -5,33 +5,9 @@ import SelectField from "./SelectField.jsx";
 import SweepChart from "./SweepChart.jsx";
 import { downloadCsv } from "../utils/csv.js";
 import { tsfcPerHour } from "../utils/format.js";
-
-const SWEEP_PARAMS = [
-  {
-    key: "altitude_m", label: "Altitude", unit: "m",
-    min: 0, max: 11000, defaultMin: 0, defaultMax: 11000, rangeStep: 100, axisDecimals: 0,
-  },
-  {
-    key: "mach_flight", label: "Flight Mach number", unit: "M",
-    min: 0, max: 3, defaultMin: 0, defaultMax: 2, rangeStep: 0.05, axisDecimals: 2,
-  },
-  {
-    key: "pi_c", label: "Compressor pressure ratio", unit: "π_c",
-    min: 1.5, max: 40, defaultMin: 4, defaultMax: 24, rangeStep: 0.5, axisDecimals: 1,
-  },
-  {
-    key: "T04", label: "Turbine inlet temperature", unit: "K",
-    min: 800, max: 2200, defaultMin: 1000, defaultMax: 1800, rangeStep: 25, axisDecimals: 0,
-  },
-];
+import { SWEEP_PARAMS, linspace } from "../utils/sweepParams.js";
 
 const POINT_COUNTS = [7, 11, 15, 21];
-
-function linspace(min, max, n) {
-  if (n <= 1) return [min];
-  const step = (max - min) / (n - 1);
-  return Array.from({ length: n }, (_, i) => min + step * i);
-}
 
 /**
  * Phase 2 — parameter sweep: vary one input across a range, re-solving the
