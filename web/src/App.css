@@ -694,6 +694,10 @@
   color: var(--accent);
 }
 
+.expandable-section-body {
+  margin-top: 4px;
+}
+
 /* --- Glossary (collapsible plain-English legend) --- */
 
 .glossary {
