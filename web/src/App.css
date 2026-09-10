@@ -64,6 +64,14 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 8px;
+  gap: 12px;
+}
+
+.config-form-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .config-form-header h2 {
