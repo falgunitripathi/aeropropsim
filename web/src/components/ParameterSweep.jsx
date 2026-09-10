@@ -3,6 +3,7 @@ import { solveEngine } from "../physics/engine.js";
 import NumberField from "./NumberField.jsx";
 import SelectField from "./SelectField.jsx";
 import SweepChart from "./SweepChart.jsx";
+import ExpandableSection from "./ExpandableSection.jsx";
 import { downloadCsv } from "../utils/csv.js";
 import { tsfcPerHour } from "../utils/format.js";
 import { SWEEP_PARAMS, linspace } from "../utils/sweepParams.js";
@@ -65,8 +66,10 @@ export default function ParameterSweep({ config }) {
   };
 
   return (
-    <section>
-      <h2>Parameter sweep</h2>
+    <ExpandableSection
+      title="Parameter sweep"
+      summary="Vary one input across a range and see how thrust, TSFC, and overall efficiency respond. Expand to sweep one."
+    >
       <p className="section-note">
         Vary one input across a range — every other setting stays as
         currently configured on the left — and see how thrust, TSFC, and
@@ -145,7 +148,7 @@ export default function ParameterSweep({ config }) {
           xDecimals={activeParam.axisDecimals}
         />
       </div>
-    </section>
+    </ExpandableSection>
   );
 }
 
