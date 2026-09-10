@@ -1,8 +1,23 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { defaultEngineConfig, solveEngine } from "./physics/engine.js";
 import ConfigForm from "./components/ConfigForm.jsx";
 import ResultsPanel from "./components/ResultsPanel.jsx";
 import "./App.css";
+
+const SAVED_CONFIGS_KEY = "thrustforge:savedConfigs";
+
+// localStorage can throw (Safari private mode, disabled storage, quota),
+// and a previous version's JSON could in principle be malformed — either
+// way this is a nice-to-have, never something that should crash the app.
+function loadSavedConfigs() {
+  try {
+    const raw = localStorage.getItem(SAVED_CONFIGS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 /**
  * ThrustForge — a single-spool turbojet performance simulator.
@@ -16,10 +31,22 @@ import "./App.css";
  */
 function App() {
   const [config, setConfig] = useState(defaultEngineConfig());
-  const [savedConfigs, setSavedConfigs] = useState([]);
+  const [savedConfigs, setSavedConfigs] = useState(loadSavedConfigs);
 
   const patchConfig = (patch) => setConfig((prev) => ({ ...prev, ...patch }));
   const resetConfig = () => setConfig(defaultEngineConfig());
+
+  // Persist saved configurations across reloads. Every save/remove writes
+  // straight through, so a refresh (or a link opened later) sees exactly
+  // what was there before.
+  useEffect(() => {
+    try {
+      localStorage.setItem(SAVED_CONFIGS_KEY, JSON.stringify(savedConfigs));
+    } catch {
+      // Storage full or unavailable — saved configs just stay in-memory
+      // for this session, same as before this feature existed.
+    }
+  }, [savedConfigs]);
 
   const { result, error } = useMemo(() => {
     try {
