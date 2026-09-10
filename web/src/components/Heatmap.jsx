@@ -38,13 +38,17 @@ export default function Heatmap({
   const width = PAD_L + PAD_R + cols * CELL;
   const height = PAD_T + PAD_B + rows * CELL;
 
+  const bestSummary = best
+    ? `; best cell at ${xLabel} ${xValues[best.col].toFixed(xDecimals)}${xUnit ? ` ${xUnit}` : ""}, ${yLabel} ${yValues[best.row].toFixed(yDecimals)}${yUnit ? ` ${yUnit}` : ""}`
+    : "";
+
   return (
     <div className="heatmap-wrap">
       <svg
         className="heatmap-svg"
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label={`Heatmap of ${xLabel} versus ${yLabel}`}
+        aria-label={`Heatmap of ${xLabel} versus ${yLabel}, values from ${vMin.toFixed(decimals)}${unit} to ${vMax.toFixed(decimals)}${unit}${bestSummary}. Full grid given as a table below.`}
       >
         {grid.map((row, ri) =>
           row.map((v, ci) => {
@@ -110,6 +114,38 @@ export default function Heatmap({
           {yLabel}{yUnit ? ` (${yUnit})` : ""}
         </text>
       </svg>
+
+      <table className="sr-only">
+        <caption>
+          {xLabel}{xUnit ? ` (${xUnit})` : ""} versus {yLabel}{yUnit ? ` (${yUnit})` : ""} grid
+          (same values as the heatmap above; rows are {yLabel}, columns are {xLabel})
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{yLabel}{yUnit ? ` (${yUnit})` : ""} \ {xLabel}{xUnit ? ` (${xUnit})` : ""}</th>
+            {xValues.map((x, ci) => (
+              <th scope="col" key={ci}>{x.toFixed(xDecimals)}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {yValues.map((y, ri) => (
+            <tr key={ri}>
+              <th scope="row">{y.toFixed(yDecimals)}</th>
+              {xValues.map((_, ci) => {
+                const v = grid[ri][ci];
+                const valid = v !== null && Number.isFinite(v);
+                const isBest = best && best.row === ri && best.col === ci;
+                return (
+                  <td key={ci}>
+                    {valid ? `${v.toFixed(decimals)}${unit}` : "infeasible"}{isBest ? " (best)" : ""}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
