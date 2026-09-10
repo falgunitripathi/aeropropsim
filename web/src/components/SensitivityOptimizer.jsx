@@ -4,6 +4,7 @@ import NumberField from "./NumberField.jsx";
 import SelectField from "./SelectField.jsx";
 import SweepChart from "./SweepChart.jsx";
 import Heatmap from "./Heatmap.jsx";
+import ExpandableSection from "./ExpandableSection.jsx";
 import { downloadCsv } from "../utils/csv.js";
 import { fmt, tsfcPerHour } from "../utils/format.js";
 import { SWEEP_PARAMS, linspace } from "../utils/sweepParams.js";
@@ -157,8 +158,10 @@ export default function SensitivityOptimizer({ config }) {
   const bestPoint = search.mode === "1d" ? search.best?.point : search.best?.point;
 
   return (
-    <section>
-      <h2>Sensitivity &amp; optimization</h2>
+    <ExpandableSection
+      title="Sensitivity & optimization"
+      summary="Grid-search one or two inputs to find the design point that best serves a chosen objective (max thrust, min TSFC, max efficiency). Expand to search."
+    >
       <p className="section-note">
         Search across one or two inputs — every other setting stays as
         currently configured on the left — to find the design point that
@@ -266,6 +269,6 @@ export default function SensitivityOptimizer({ config }) {
           yDecimals={paramB.axisDecimals}
         />
       )}
-    </section>
+    </ExpandableSection>
   );
 }
