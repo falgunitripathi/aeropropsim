@@ -1,3 +1,4 @@
+import { useState } from "react";
 import SelectField from "./SelectField.jsx";
 
 /**
@@ -12,21 +13,30 @@ import SelectField from "./SelectField.jsx";
  * wired into `solveEngine`, matching the Python reference. Switching
  * this toggle will not change any solved number below — it's left in
  * the UI so that's visible rather than hidden.
+ *
+ * Collapsed by default — click the legend to open it.
  */
 export default function NozzleSection({ config, onChange }) {
+  const [open, setOpen] = useState(false);
   return (
     <fieldset className="config-section">
-      <legend>Nozzle</legend>
-      <SelectField
-        label="Geometry"
-        value={config.nozzle_type}
-        onChange={(v) => onChange({ nozzle_type: v })}
-        options={[
-          { value: "convergent", label: "Convergent" },
-          { value: "conv-di", label: "Convergent-divergent (geometry TBD)" },
-        ]}
-        hint="Choking/exit-velocity physics is solved either way — see note in source"
-      />
+      <legend>
+        <button type="button" className="disclosure" onClick={() => setOpen(!open)}>
+          {open ? "▾" : "▸"} Nozzle
+        </button>
+      </legend>
+      {open && (
+        <SelectField
+          label="Geometry"
+          value={config.nozzle_type}
+          onChange={(v) => onChange({ nozzle_type: v })}
+          options={[
+            { value: "convergent", label: "Convergent" },
+            { value: "conv-di", label: "Convergent-divergent (geometry TBD)" },
+          ]}
+          hint="Choking/exit-velocity physics is solved either way — see note in source"
+        />
+      )}
     </fieldset>
   );
 }
