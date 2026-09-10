@@ -72,6 +72,11 @@ export default function SweepChart({
     }
   }
 
+  const rangeSummary = `ranges from ${yMin.toFixed(decimals)}${unit ? ` ${unit}` : ""} to ${yMax.toFixed(decimals)}${unit ? ` ${unit}` : ""} over ${xMin.toFixed(xDecimals)}${xUnit ? ` ${xUnit}` : ""} to ${xMax.toFixed(xDecimals)}${xUnit ? ` ${xUnit}` : ""}`;
+  const bestSummary = (bestIndex !== null && bestIndex !== undefined && Number.isFinite(yValues[bestIndex]))
+    ? `; best point at ${xValues[bestIndex].toFixed(xDecimals)}${xUnit ? ` ${xUnit}` : ""}: ${yValues[bestIndex].toFixed(decimals)}${unit ? ` ${unit}` : ""}`
+    : "";
+
   return (
     <div className="sweep-chart-card">
       <div className="sweep-chart-title">{title}</div>
@@ -79,7 +84,7 @@ export default function SweepChart({
         className="sweep-chart-svg"
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
-        aria-label={`${title} versus swept parameter`}
+        aria-label={`${title} versus swept parameter, ${rangeSummary}${bestSummary}.`}
       >
         {yTicks.map((t, i) => (
           <line
@@ -148,6 +153,28 @@ export default function SweepChart({
           </>
         )}
       </svg>
+
+      <table className="sr-only">
+        <caption>{title} data (same values as the chart above)</caption>
+        <thead>
+          <tr>
+            <th scope="col">{xUnit ? `Swept value (${xUnit})` : "Swept value"}</th>
+            <th scope="col">{unit ? `${title} (${unit})` : title}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {xValues.map((x, i) => {
+            const y = yValues[i];
+            const yText = (y === null || y === undefined || !Number.isFinite(y)) ? "—" : y.toFixed(decimals);
+            return (
+              <tr key={i}>
+                <th scope="row">{x.toFixed(xDecimals)}</th>
+                <td>{yText}{i === bestIndex ? " (best)" : ""}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
