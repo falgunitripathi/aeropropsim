@@ -159,3 +159,4 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
     </div>
   );
 }
+
