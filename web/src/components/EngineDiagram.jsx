@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useAnimatedNumber } from "../hooks/useAnimatedNumber.js";
 import { fmt, fmtKPa } from "../utils/format.js";
 import { stationHeatColor } from "../utils/heatColor.js";
@@ -791,11 +791,26 @@ function Diagram({ config, result, idSuffix }) {
 
 export default function EngineDiagram({ config, result }) {
   const [expanded, setExpanded] = useState(false);
+  const titleId = useId();
+  const closeButtonRef = useRef(null);
+  const triggerRef = useRef(null);
+  const previouslyFocused = useRef(null);
+
+  function openModal() {
+    previouslyFocused.current = document.activeElement;
+    setExpanded(true);
+  }
+
+  function closeModal() {
+    setExpanded(false);
+    (previouslyFocused.current || triggerRef.current)?.focus?.();
+  }
 
   useEffect(() => {
     if (!expanded) return undefined;
+    closeButtonRef.current?.focus();
     function onKeyDown(e) {
-      if (e.key === "Escape") setExpanded(false);
+      if (e.key === "Escape") closeModal();
     }
     window.addEventListener("keydown", onKeyDown);
     const prevOverflow = document.body.style.overflow;
@@ -804,6 +819,7 @@ export default function EngineDiagram({ config, result }) {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = prevOverflow;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expanded]);
 
   if (!result) return null;
@@ -813,7 +829,7 @@ export default function EngineDiagram({ config, result }) {
       <div className="engine-diagram">
         <div className="engine-diagram-toolbar">
           <span className="engine-diagram-title">Live engine cutaway</span>
-          <button type="button" className="ed-expand-button" onClick={() => setExpanded(true)}>
+          <button type="button" ref={triggerRef} className="ed-expand-button" aria-haspopup="dialog" onClick={openModal}>
             ⤢ Expand
           </button>
         </div>
@@ -824,20 +840,21 @@ export default function EngineDiagram({ config, result }) {
         <div
           className="ed-modal-overlay"
           onClick={(e) => {
-            if (e.target === e.currentTarget) setExpanded(false);
+            if (e.target === e.currentTarget) closeModal();
           }}
         >
-          <div className="ed-modal-content">
+          <div className="ed-modal-content" role="dialog" aria-modal="true" aria-labelledby={titleId}>
             <button
               type="button"
+              ref={closeButtonRef}
               className="ed-modal-close"
-              onClick={() => setExpanded(false)}
+              onClick={closeModal}
               aria-label="Close expanded diagram"
             >
               ×
             </button>
             <div className="engine-diagram-toolbar">
-              <span className="engine-diagram-title">Live engine cutaway</span>
+              <span className="engine-diagram-title" id={titleId}>Live engine cutaway</span>
             </div>
             <div className="engine-diagram-scroll-big">
               <Diagram config={config} result={result} idSuffix="modal" />
