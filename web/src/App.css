@@ -1462,3 +1462,20 @@
   font-weight: 600;
   fill: var(--text-h);
 }
+
+/*
+ * Visually hidden but still in the accessibility tree — the standard
+ * "sr-only" pattern. Used to give screen-reader users an actual data table
+ * alongside a chart's SVG, instead of just a one-line aria-label summary.
+ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
