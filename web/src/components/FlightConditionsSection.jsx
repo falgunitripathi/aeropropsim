@@ -18,7 +18,7 @@ export default function FlightConditionsSection({ config, onChange }) {
   return (
     <fieldset className="config-section">
       <legend>
-        <button type="button" className="disclosure" onClick={() => setOpen(!open)}>
+        <button type="button" className="disclosure" aria-expanded={open} onClick={() => setOpen(!open)}>
           {open ? "▾" : "▸"} Flight condition
         </button>
       </legend>
