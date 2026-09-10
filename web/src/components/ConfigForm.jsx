@@ -19,6 +19,7 @@ import { buildShareUrl } from "../utils/shareLink.js";
  */
 export default function ConfigForm({ config, onChange, onReset }) {
   const [copied, setCopied] = useState(false);
+  const [massFlowOpen, setMassFlowOpen] = useState(false);
 
   // Phase 3 — shareable configuration links: every field here already
   // lives in the URL's query string (see utils/shareLink.js + App.jsx),
@@ -55,16 +56,22 @@ export default function ConfigForm({ config, onChange, onReset }) {
       <TurbineSection config={config} onChange={onChange} />
       <NozzleSection config={config} onChange={onChange} />
       <fieldset className="config-section">
-        <legend>Mass flow</legend>
-        <NumberField
-          label="Air mass flow rate"
-          value={config.mdot_a}
-          onChange={(v) => onChange({ mdot_a: v })}
-          min={0.01}
-          max={2000}
-          step={1}
-          hint="kg/s — scales absolute thrust; specific thrust/TSFC/efficiencies are independent of it"
-        />
+        <legend>
+          <button type="button" className="disclosure" onClick={() => setMassFlowOpen(!massFlowOpen)}>
+            {massFlowOpen ? "▾" : "▸"} Mass flow
+          </button>
+        </legend>
+        {massFlowOpen && (
+          <NumberField
+            label="Air mass flow rate"
+            value={config.mdot_a}
+            onChange={(v) => onChange({ mdot_a: v })}
+            min={0.01}
+            max={2000}
+            step={1}
+            hint="kg/s — scales absolute thrust; specific thrust/TSFC/efficiencies are independent of it"
+          />
+        )}
       </fieldset>
       <AdvancedSection config={config} onChange={onChange} />
     </div>
