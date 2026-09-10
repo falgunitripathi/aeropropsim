@@ -13,7 +13,7 @@ export default function AdvancedSection({ config, onChange }) {
   return (
     <fieldset className="config-section advanced">
       <legend>
-        <button type="button" className="disclosure" onClick={() => setOpen(!open)}>
+        <button type="button" className="disclosure" aria-expanded={open} onClick={() => setOpen(!open)}>
           {open ? "▾" : "▸"} Advanced: design defaults &amp; gas properties
         </button>
       </legend>
