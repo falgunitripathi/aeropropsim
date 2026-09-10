@@ -43,9 +43,17 @@ export default function PvDiagram({ stations }) {
     .map((p, i) => `${i === 0 ? "M" : "L"} ${xScale(p.v).toFixed(1)} ${yScale(p.p).toFixed(1)}`)
     .join(" ");
 
+  const dataSummary = points
+    .map((p) => `station ${p.key}: ${fmt(p.p, 0)} kPa, v ${fmt(p.v, 3)} m³/kg`)
+    .join("; ");
+
   return (
     <div className="ts-diagram">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Pressure-specific volume process diagram">
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        role="img"
+        aria-label={`Pressure-specific volume process diagram across stations a through 9. ${dataSummary}.`}
+      >
         {/* axes */}
         <line x1={MARGIN.left} y1={MARGIN.top} x2={MARGIN.left} y2={MARGIN.top + plotH} className="ts-axis" />
         <line x1={MARGIN.left} y1={MARGIN.top + plotH} x2={MARGIN.left + plotW} y2={MARGIN.top + plotH} className="ts-axis" />
@@ -75,6 +83,26 @@ export default function PvDiagram({ stations }) {
           </g>
         ))}
       </svg>
+
+      <table className="sr-only">
+        <caption>Pressure-specific volume data (same values as the diagram above)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Station</th>
+            <th scope="col">Static p (kPa)</th>
+            <th scope="col">v (m³/kg)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {points.map((p) => (
+            <tr key={p.key}>
+              <th scope="row">{p.key}</th>
+              <td>{fmt(p.p, 0)}</td>
+              <td>{fmt(p.v, 3)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
