@@ -1,3 +1,4 @@
+import { useState } from "react";
 import NumberField from "./NumberField.jsx";
 
 /**
@@ -7,29 +8,42 @@ import NumberField from "./NumberField.jsx";
  * `isaTroposphere` deliberately throws outside that band rather than
  * silently extrapolating (see atmosphere.js docstring) — the stratosphere
  * needs reference constants this project's source doesn't supply.
+ *
+ * Collapsed by default, like every other config section — click the
+ * legend to open it. Keeps the sidebar short instead of always showing
+ * every field for every section at once.
  */
 export default function FlightConditionsSection({ config, onChange }) {
+  const [open, setOpen] = useState(false);
   return (
     <fieldset className="config-section">
-      <legend>Flight condition</legend>
-      <NumberField
-        label="Altitude"
-        value={config.altitude_m}
-        onChange={(v) => onChange({ altitude_m: v })}
-        min={0}
-        max={11000}
-        step={100}
-        hint="m, ISA troposphere (0-11,000 m)"
-      />
-      <NumberField
-        label="Flight Mach number"
-        value={config.mach_flight}
-        onChange={(v) => onChange({ mach_flight: v })}
-        min={0}
-        max={5.0}
-        step={0.05}
-        hint="M∞ (0-5)"
-      />
+      <legend>
+        <button type="button" className="disclosure" onClick={() => setOpen(!open)}>
+          {open ? "▾" : "▸"} Flight condition
+        </button>
+      </legend>
+      {open && (
+        <>
+          <NumberField
+            label="Altitude"
+            value={config.altitude_m}
+            onChange={(v) => onChange({ altitude_m: v })}
+            min={0}
+            max={11000}
+            step={100}
+            hint="m, ISA troposphere (0-11,000 m)"
+          />
+          <NumberField
+            label="Flight Mach number"
+            value={config.mach_flight}
+            onChange={(v) => onChange({ mach_flight: v })}
+            min={0}
+            max={5.0}
+            step={0.05}
+            hint="M∞ (0-5)"
+          />
+        </>
+      )}
     </fieldset>
   );
 }
