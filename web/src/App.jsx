@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { defaultEngineConfig, solveEngine } from "./physics/engine.js";
+import { buildShareUrl, configFromSearchParams } from "./utils/shareLink.js";
 import ConfigForm from "./components/ConfigForm.jsx";
 import ResultsPanel from "./components/ResultsPanel.jsx";
 import "./App.css";
 
 const SAVED_CONFIGS_KEY = "thrustforge:savedConfigs";
+
+// A link opens the app at exactly the configuration it was built from:
+// any recognized query param overrides that one field of the default
+// config, so a link missing a field (or an older link, from before some
+// field existed) still falls back sanely instead of breaking.
+function initialConfig() {
+  const patch = configFromSearchParams(new URLSearchParams(window.location.search));
+  return { ...defaultEngineConfig(), ...patch };
+}
 
 // localStorage can throw (Safari private mode, disabled storage, quota),
 // and a previous version's JSON could in principle be malformed — either
@@ -30,11 +40,18 @@ function loadSavedConfigs() {
  * not the project's name.)
  */
 function App() {
-  const [config, setConfig] = useState(defaultEngineConfig());
+  const [config, setConfig] = useState(initialConfig);
   const [savedConfigs, setSavedConfigs] = useState(loadSavedConfigs);
 
   const patchConfig = (patch) => setConfig((prev) => ({ ...prev, ...patch }));
   const resetConfig = () => setConfig(defaultEngineConfig());
+
+  // Keep the address bar itself as a live, shareable link to the current
+  // configuration — replaceState (not pushState) so tweaking a slider
+  // doesn't spam the browser's back-button history.
+  useEffect(() => {
+    window.history.replaceState(null, "", buildShareUrl(config));
+  }, [config]);
 
   // Persist saved configurations across reloads. Every save/remove writes
   // straight through, so a refresh (or a link opened later) sees exactly
