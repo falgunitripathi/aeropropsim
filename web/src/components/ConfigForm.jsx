@@ -1,3 +1,4 @@
+import { useState } from "react";
 import NumberField from "./NumberField.jsx";
 import FlightConditionsSection from "./FlightConditionsSection.jsx";
 import CompressorSection from "./CompressorSection.jsx";
@@ -5,6 +6,7 @@ import CombustorSection from "./CombustorSection.jsx";
 import TurbineSection from "./TurbineSection.jsx";
 import NozzleSection from "./NozzleSection.jsx";
 import AdvancedSection from "./AdvancedSection.jsx";
+import { buildShareUrl } from "../utils/shareLink.js";
 
 /**
  * The full engine-configuration form: flight condition, compressor,
@@ -16,13 +18,36 @@ import AdvancedSection from "./AdvancedSection.jsx";
  * patch to merge in, mirroring the parent's state-update pattern.
  */
 export default function ConfigForm({ config, onChange, onReset }) {
+  const [copied, setCopied] = useState(false);
+
+  // Phase 3 — shareable configuration links: every field here already
+  // lives in the URL's query string (see utils/shareLink.js + App.jsx),
+  // so "copy link" just needs to grab the current address bar value.
+  const copyShareLink = async () => {
+    const url = buildShareUrl(config);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access can be blocked (permissions, insecure context);
+      // fall back to a prompt the user can copy from by hand.
+      window.prompt("Copy this link:", url);
+    }
+  };
+
   return (
     <div className="config-form">
       <div className="config-form-header">
         <h2>Engine configuration</h2>
-        <button type="button" className="reset-button" onClick={onReset}>
-          Reset to defaults
-        </button>
+        <div className="config-form-actions">
+          <button type="button" className="reset-button" onClick={copyShareLink}>
+            {copied ? "Link copied!" : "Copy shareable link"}
+          </button>
+          <button type="button" className="reset-button" onClick={onReset}>
+            Reset to defaults
+          </button>
+        </div>
       </div>
       <FlightConditionsSection config={config} onChange={onChange} />
       <CompressorSection config={config} onChange={onChange} />
