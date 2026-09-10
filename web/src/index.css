@@ -130,4 +130,3 @@ input, select, button {
 .config-section:nth-of-type(5) legend .disclosure::before { content: "🚀 "; }
 .config-section:nth-of-type(6) legend .disclosure::before { content: "⚖️ "; }
 .config-section:nth-of-type(7) legend .disclosure::before { content: "🔧 "; }
-
