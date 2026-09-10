@@ -1,20 +1,30 @@
+import { lazy, Suspense } from "react";
 import PerformanceSummary from "./PerformanceSummary.jsx";
 import AtmosphereReadout from "./AtmosphereReadout.jsx";
 import StationTable from "./StationTable.jsx";
 import StageTable from "./StageTable.jsx";
 import TsDiagram from "./TsDiagram.jsx";
 import PvDiagram from "./PvDiagram.jsx";
-import EngineDiagram from "./EngineDiagram.jsx";
 import Glossary from "./Glossary.jsx";
-import ParameterSweep from "./ParameterSweep.jsx";
-import SensitivityOptimizer from "./SensitivityOptimizer.jsx";
 import ConfigCompare from "./ConfigCompare.jsx";
-import AssumptionsPanel from "./AssumptionsPanel.jsx";
-import EngineSizing from "./EngineSizing.jsx";
-import MissionAnalysis from "./MissionAnalysis.jsx";
 import ReportExport from "./ReportExport.jsx";
 import ExpandableSection from "./ExpandableSection.jsx";
+import SectionSkeleton from "./SectionSkeleton.jsx";
 import { fmt } from "../utils/format.js";
+
+// These six sit behind a click-to-open panel already (either their own
+// internal expand/modal, like EngineDiagram, or a self-wrapped
+// <ExpandableSection>, like the rest) and together make up most of the JS
+// bundle. React.lazy defers fetching each one's code until the results page
+// actually renders it — which is always, just not on the very first paint —
+// so the initial bundle only pays for the six small <Suspense> fallbacks
+// below, not the charts/tables/SVGs inside.
+const EngineDiagram = lazy(() => import("./EngineDiagram.jsx"));
+const ParameterSweep = lazy(() => import("./ParameterSweep.jsx"));
+const SensitivityOptimizer = lazy(() => import("./SensitivityOptimizer.jsx"));
+const EngineSizing = lazy(() => import("./EngineSizing.jsx"));
+const MissionAnalysis = lazy(() => import("./MissionAnalysis.jsx"));
+const AssumptionsPanel = lazy(() => import("./AssumptionsPanel.jsx"));
 
 const STATION_TERMS = [
   { symbol: "T0", meaning: "Stagnation (total) temperature — what a thermometer would read if the flow were brought to rest here." },
@@ -62,7 +72,9 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
         <ReportExport config={config} result={result} />
       </section>
 
-      <EngineDiagram config={config} result={result} />
+      <Suspense fallback={<SectionSkeleton title="Live engine cutaway" />}>
+        <EngineDiagram config={config} result={result} />
+      </Suspense>
 
       <ExpandableSection
         title="Station analysis"
@@ -137,26 +149,32 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
         </div>
       </ExpandableSection>
 
-      <ParameterSweep config={config} />
+      <Suspense fallback={<SectionSkeleton title="Parameter sweep" />}>
+        <ParameterSweep config={config} />
+      </Suspense>
 
-      <SensitivityOptimizer config={config} />
+      <Suspense fallback={<SectionSkeleton title="Sensitivity & optimization" />}>
+        <SensitivityOptimizer config={config} />
+      </Suspense>
 
-      <EngineSizing config={config} result={result} />
+      <Suspense fallback={<SectionSkeleton title="Engine sizing" />}>
+        <EngineSizing config={config} result={result} />
+      </Suspense>
 
-      <MissionAnalysis config={config} />
+      <Suspense fallback={<SectionSkeleton title="Mission analysis" />}>
+        <MissionAnalysis config={config} />
+      </Suspense>
 
-      <AssumptionsPanel config={config} />
+      <Suspense fallback={<SectionSkeleton title="Assumptions" />}>
+        <AssumptionsPanel config={config} />
+      </Suspense>
 
-      <section>
-        <h2>Saved configurations</h2>
-        <p className="section-note">
-          Snapshot the current configuration and its results, then compare
-          several side by side. Saved here in your browser, so they're
-          still here next time you open ThrustForge.
-        </p>
+      <ExpandableSection
+        title="Saved configurations"
+        summary="Snapshot the current configuration and its results, then compare several side by side. Saved here in your browser, so they're still here next time you open ThrustForge."
+      >
         <ConfigCompare savedConfigs={savedConfigs} onSave={onSaveConfig} onRemove={onRemoveConfig} />
-      </section>
+      </ExpandableSection>
     </div>
   );
 }
-
