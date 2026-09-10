@@ -55,8 +55,28 @@
 .config-form {
   padding: 24px 28px;
   border-right: 1px solid var(--border);
+  /*
+   * .app-main uses align-items: start so a short sidebar doesn't stretch
+   * its border-right the full height of the (much taller) results column.
+   * But that also shrinks *this* grid item's own box down to its content
+   * height, which leaves position: sticky nothing to stick within past
+   * that point — it was unsticking partway down the page and scrolling
+   * out of view for the rest of it. align-self: stretch gives this one
+   * item the full row height back (so sticky has the whole page to work
+   * with) while every other item in the row is unaffected.
+   */
+  align-self: stretch;
   position: sticky;
   top: 0;
+  /*
+   * A defensive cap: if several sections are expanded at once the sidebar
+   * can still exceed one screen's height. Without this, the sticky box's
+   * overflow would render below the visible viewport with no way to
+   * scroll to it (sticky only fixes the top edge). Capping to the
+   * viewport and scrolling internally keeps every field reachable.
+   */
+  max-height: 100vh;
+  overflow-y: auto;
 }
 
 .config-form-header {
@@ -1066,11 +1086,11 @@
 }
 
 .tornado-swatch-low {
-  background: #2a78d6;
+  background: var(--tornado-low);
 }
 
 .tornado-swatch-high {
-  background: #eb6834;
+  background: var(--tornado-high);
 }
 
 .tornado-svg {
@@ -1101,11 +1121,11 @@
 }
 
 .tornado-bar-low {
-  fill: #2a78d6;
+  fill: var(--tornado-low);
 }
 
 .tornado-bar-high {
-  fill: #eb6834;
+  fill: var(--tornado-high);
 }
 
 .tornado-value-label {
@@ -1249,8 +1269,8 @@
 }
 
 .validation-badge.is-pass {
-  background: rgba(27, 175, 123, 0.12);
-  color: #1a8f66;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .validation-badge.is-fail {
@@ -1264,7 +1284,7 @@
 }
 
 .validation-summary.is-pass {
-  color: #1a8f66;
+  color: var(--success-text);
 }
 
 .validation-summary.is-fail {
