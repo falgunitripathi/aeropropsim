@@ -8,11 +8,8 @@ import EngineDiagram from "./EngineDiagram.jsx";
 import Glossary from "./Glossary.jsx";
 import ParameterSweep from "./ParameterSweep.jsx";
 import SensitivityOptimizer from "./SensitivityOptimizer.jsx";
-import TornadoSensitivity from "./TornadoSensitivity.jsx";
 import ConfigCompare from "./ConfigCompare.jsx";
-import ValidationPanel from "./ValidationPanel.jsx";
 import AssumptionsPanel from "./AssumptionsPanel.jsx";
-import IdealVsReal from "./IdealVsReal.jsx";
 import EngineSizing from "./EngineSizing.jsx";
 import MissionAnalysis from "./MissionAnalysis.jsx";
 import ReportExport from "./ReportExport.jsx";
@@ -67,48 +64,55 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
 
       <EngineDiagram config={config} result={result} />
 
-      <section>
-        <h2>Station analysis</h2>
+      <ExpandableSection
+        title="Station analysis"
+        summary="Stagnation and static properties (T0, p0, T, p, M, V, ρ, h, h0) at every station from intake to nozzle exit. Expand to view."
+      >
         <StationTable stations={stations} />
         <Glossary terms={STATION_TERMS} />
-      </section>
+      </ExpandableSection>
 
-      <div className="stage-tables-row">
-        <section>
-          <h2>Compressor stages ({compressor.type})</h2>
-          <StageTable stages={compressor.stages} kind="compressor" />
-          <p className="section-note">
-            Overall π_c achieved: {fmt(compressor.pi_actual, 3)}
-          </p>
-          {compressor.type === "centrifugal" && (
+      <ExpandableSection
+        title={`Compressor & turbine stages (${compressor.type} / ${turbine.type})`}
+        summary="Per-stage temperature rise/drop, pressure ratio, and cumulative loss for the compressor and turbine. Expand to view."
+      >
+        <div className="stage-tables-row">
+          <section>
+            <h2>Compressor stages ({compressor.type})</h2>
+            <StageTable stages={compressor.stages} kind="compressor" />
             <p className="section-note">
-              In calculation form: you set blade tip speed U2 ={" "}
-              {fmt(config.centrifugal_U2, 0)} m/s, and π_c is derived from it
-              via π_c = [1 + η_c·(γ_c−1)·(U2/a01)²]^(γ_c/(γ_c−1)) — the
-              pressure ratio is a result here, not something you dial in
-              directly (§4.3).
+              Overall π_c achieved: {fmt(compressor.pi_actual, 3)}
             </p>
-          )}
-          <Glossary terms={STAGE_TERMS} />
-        </section>
+            {compressor.type === "centrifugal" && (
+              <p className="section-note">
+                In calculation form: you set blade tip speed U2 ={" "}
+                {fmt(config.centrifugal_U2, 0)} m/s, and π_c is derived from it
+                via π_c = [1 + η_c·(γ_c−1)·(U2/a01)²]^(γ_c/(γ_c−1)) — the
+                pressure ratio is a result here, not something you dial in
+                directly (§4.3).
+              </p>
+            )}
+            <Glossary terms={STAGE_TERMS} />
+          </section>
 
-        <section>
-          <h2>Turbine stages ({turbine.type})</h2>
-          <StageTable stages={turbine.stages} kind="turbine" />
-          <p className="section-note">
-            Overall expansion ratio achieved: {fmt(1.0 / turbine.pr_actual, 3)}
-          </p>
-          {turbine.type === "radial" && (
+          <section>
+            <h2>Turbine stages ({turbine.type})</h2>
+            <StageTable stages={turbine.stages} kind="turbine" />
             <p className="section-note">
-              In calculation form: spouting velocity V0 ={" "}
-              {fmt(turbine.V0_spouting, 1)} m/s (from the cycle's own T04 and
-              T05), then blade tip speed U2 = 0.707 × V0 ={" "}
-              {fmt(turbine.U2_sized, 1)} m/s. Both are calculated outputs
-              here — you don't set them directly (§6.2).
+              Overall expansion ratio achieved: {fmt(1.0 / turbine.pr_actual, 3)}
             </p>
-          )}
-        </section>
-      </div>
+            {turbine.type === "radial" && (
+              <p className="section-note">
+                In calculation form: spouting velocity V0 ={" "}
+                {fmt(turbine.V0_spouting, 1)} m/s (from the cycle's own T04 and
+                T05), then blade tip speed U2 = 0.707 × V0 ={" "}
+                {fmt(turbine.U2_sized, 1)} m/s. Both are calculated outputs
+                here — you don't set them directly (§6.2).
+              </p>
+            )}
+          </section>
+        </div>
+      </ExpandableSection>
 
       <ExpandableSection
         title="Cycle diagrams"
@@ -137,15 +141,9 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
 
       <SensitivityOptimizer config={config} />
 
-      <TornadoSensitivity config={config} result={result} />
-
-      <IdealVsReal config={config} result={result} />
-
       <EngineSizing config={config} result={result} />
 
       <MissionAnalysis config={config} />
-
-      <ValidationPanel />
 
       <AssumptionsPanel config={config} />
 
@@ -161,4 +159,3 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
     </div>
   );
 }
-
