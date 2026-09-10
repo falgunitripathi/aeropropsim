@@ -57,7 +57,7 @@ export default function ConfigForm({ config, onChange, onReset }) {
       <NozzleSection config={config} onChange={onChange} />
       <fieldset className="config-section">
         <legend>
-          <button type="button" className="disclosure" onClick={() => setMassFlowOpen(!massFlowOpen)}>
+          <button type="button" className="disclosure" aria-expanded={massFlowOpen} onClick={() => setMassFlowOpen(!massFlowOpen)}>
             {massFlowOpen ? "▾" : "▸"} Mass flow
           </button>
         </legend>
