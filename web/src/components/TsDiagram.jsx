@@ -55,9 +55,17 @@ export default function TsDiagram({ stations }) {
     .map((p, i) => `${i === 0 ? "M" : "L"} ${xScale(p.s).toFixed(1)} ${yScale(p.T).toFixed(1)}`)
     .join(" ");
 
+  const dataSummary = points
+    .map((p) => `station ${p.key}: ${fmt(p.T, 0)} K, Δs ${fmt(p.s, 1)} J/(kg·K)`)
+    .join("; ");
+
   return (
     <div className="ts-diagram">
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label="Temperature-entropy process diagram">
+      <svg
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        role="img"
+        aria-label={`Temperature-entropy process diagram across stations a through 9. ${dataSummary}.`}
+      >
         {/* axes */}
         <line x1={MARGIN.left} y1={MARGIN.top} x2={MARGIN.left} y2={MARGIN.top + plotH} className="ts-axis" />
         <line x1={MARGIN.left} y1={MARGIN.top + plotH} x2={MARGIN.left + plotW} y2={MARGIN.top + plotH} className="ts-axis" />
@@ -87,6 +95,26 @@ export default function TsDiagram({ stations }) {
           </g>
         ))}
       </svg>
+
+      <table className="sr-only">
+        <caption>Temperature-entropy data (same values as the diagram above)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Station</th>
+            <th scope="col">T (K)</th>
+            <th scope="col">Δs relative to station a (J/kg·K)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {points.map((p) => (
+            <tr key={p.key}>
+              <th scope="row">{p.key}</th>
+              <td>{fmt(p.T, 0)}</td>
+              <td>{fmt(p.s, 1)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
