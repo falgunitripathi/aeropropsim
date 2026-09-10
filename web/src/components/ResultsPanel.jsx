@@ -153,7 +153,8 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
         <h2>Saved configurations</h2>
         <p className="section-note">
           Snapshot the current configuration and its results, then compare
-          several side by side.
+          several side by side. Saved here in your browser, so they're
+          still here next time you open ThrustForge.
         </p>
         <ConfigCompare savedConfigs={savedConfigs} onSave={onSaveConfig} onRemove={onRemoveConfig} />
       </section>
