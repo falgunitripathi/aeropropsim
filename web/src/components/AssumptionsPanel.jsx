@@ -1,3 +1,4 @@
+import ExpandableSection from "./ExpandableSection.jsx";
 import { fmt } from "../utils/format.js";
 
 const CURRENT_VALUE_ROWS = [
@@ -25,8 +26,10 @@ const CURRENT_VALUE_ROWS = [
  */
 export default function AssumptionsPanel({ config }) {
   return (
-    <section>
-      <h2>Assumptions</h2>
+    <ExpandableSection
+      title="Assumptions"
+      summary="The efficiency and gas-property values behind the results above, right now. Expand for the full table."
+    >
       <p className="section-note">
         The efficiency and gas-property values behind the results above,
         right now (editable in the Advanced section of the form on the
@@ -48,6 +51,6 @@ export default function AssumptionsPanel({ config }) {
           </tbody>
         </table>
       </div>
-    </section>
+    </ExpandableSection>
   );
 }
