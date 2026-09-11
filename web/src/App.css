@@ -832,6 +832,10 @@
   color: var(--accent);
 }
 
+.expandable-section-summary {
+  margin-bottom: 10px;
+}
+
 .expandable-section-body {
   margin-top: 4px;
 }
