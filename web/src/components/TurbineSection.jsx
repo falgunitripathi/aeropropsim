@@ -45,7 +45,11 @@ export default function TurbineSection({ config, onChange }) {
             max={10}
             step={1}
             disabled={!isAxial}
-            hint={!isAxial ? "radial turbines are single-stage only (§6.2)" : undefined}
+            hint={
+              !isAxial
+                ? "radial turbines are single-stage only (§6.2)"
+                : "splits the same overall expansion into more/fewer stages for the per-stage table below — it doesn't change thrust, TSFC, or the overall cycle numbers, which come entirely from the shaft power balance"
+            }
           />
         </>
       )}
