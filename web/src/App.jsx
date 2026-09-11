@@ -42,6 +42,10 @@ function loadSavedConfigs() {
 function App() {
   const [config, setConfig] = useState(initialConfig);
   const [savedConfigs, setSavedConfigs] = useState(loadSavedConfigs);
+  // The whole left configuration sidebar can be tucked away to free up
+  // width for the results column — separate from each section's own
+  // individual disclosure toggle inside ConfigForm.
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const patchConfig = (patch) => setConfig((prev) => ({ ...prev, ...patch }));
   const resetConfig = () => setConfig(defaultEngineConfig());
@@ -96,8 +100,26 @@ function App() {
         </p>
       </header>
 
-      <main className="app-main">
-        <ConfigForm config={config} onChange={patchConfig} onReset={resetConfig} />
+      <main className={`app-main${sidebarOpen ? "" : " app-main-sidebar-collapsed"}`}>
+        {sidebarOpen ? (
+          <ConfigForm
+            config={config}
+            onChange={patchConfig}
+            onReset={resetConfig}
+            onCollapse={() => setSidebarOpen(false)}
+          />
+        ) : (
+          <button
+            type="button"
+            className="sidebar-reopen-button"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Show engine configuration panel"
+            title="Show engine configuration panel"
+          >
+            <span aria-hidden="true">☰</span>
+            <span className="sidebar-reopen-label">Configuration</span>
+          </button>
+        )}
 
         <div className="results-area">
           {error ? (
