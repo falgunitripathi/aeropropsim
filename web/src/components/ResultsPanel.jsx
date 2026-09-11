@@ -78,7 +78,7 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
 
       <ExpandableSection
         title="Station analysis"
-        summary="Stagnation and static properties (T0, p0, T, p, M, V, ρ, h, h0) at every station from intake to nozzle exit. Expand to view."
+        summary="Stagnation and static properties (T0, p0, T, p, M, V, ρ, h, h0) at every station from intake to nozzle exit, numbered 1-6 in flow order (station keys a, 2, 3, 4, 5, 9 follow the textbook convention, which skips 6-8). Expand to view."
       >
         <StationTable stations={stations} />
         <Glossary terms={STATION_TERMS} />
@@ -178,4 +178,3 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
     </div>
   );
 }
-
