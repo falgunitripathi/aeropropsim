@@ -9,6 +9,13 @@
  * web/scripts/dump_engine_result.mjs), then recursively diffs the two
  * flattened JSON results with a tight numeric tolerance.
  *
+ * Also runs a second battery for the off-design/component-map matching
+ * solver (aeropropsim.off_design.lock_design_point/solve_off_design vs.
+ * web/src/physics/offDesign.js's lockDesignPoint/solveOffDesign), via the
+ * dump_off_design_result.py/.mjs pair — same diff machinery, same
+ * tolerance, plus a check that both sides raise/don't-raise OffDesignError
+ * in agreement for scenarios that probe the model's validity envelope.
+ *
  * This is the guard against the JS and Python physics implementations
  * silently drifting apart, which is the accepted tradeoff of porting the
  * engine to JS for a static, server-free site (see project README).
@@ -25,6 +32,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
 const PY_SCRIPT = path.join(REPO_ROOT, "scripts", "dump_engine_result.py");
 const JS_SCRIPT = path.join(__dirname, "dump_engine_result.mjs");
+const PY_OFFDESIGN_SCRIPT = path.join(REPO_ROOT, "scripts", "dump_off_design_result.py");
+const JS_OFFDESIGN_SCRIPT = path.join(__dirname, "dump_off_design_result.mjs");
 
 // Relative tolerance for numeric comparisons. Floating-point arithmetic
 // order can differ subtly between Python and JS (both are IEEE-754
@@ -83,17 +92,61 @@ const SCENARIOS = [
   },
 ];
 
-function runPython(overrides) {
+// ---------------------------------------------------------------------------
+// Off-design scenario battery.
+//
+// Covers: exact design-point reproduction (Nr/mr should land on ~1.0),
+// nearby and envelope-edge off-design points (higher altitude/Mach at
+// reduced throttle, and a high-altitude/high-Mach/high-throttle point near
+// the Nr_HI_HARD wall), two design points that should be REJECTED by
+// lockDesignPoint (a centrifugal compressor, and a low-pi_c/low-T04 point
+// whose nozzle never chokes), and one in-envelope design point given an
+// off-design query that is itself infeasible (T04_target far beyond what
+// the shaft-balance solve can reach) — all confirmed against the Python
+// reference in scripts/off_design_scenarios.md-equivalent exploration
+// before being added here.
+// ---------------------------------------------------------------------------
+const OFF_DESIGN_SCENARIOS = [
+  {
+    name: "off-design: reproduces its own design point exactly",
+    args: { config_overrides: {}, altitude_m: 0.0, mach_flight: 0.0, T04_target: 1400.0 },
+  },
+  {
+    name: "off-design: cruise altitude/Mach, reduced throttle",
+    args: { config_overrides: {}, altitude_m: 8000.0, mach_flight: 0.7, T04_target: 1300.0 },
+  },
+  {
+    name: "off-design: high altitude/Mach, near the corrected-speed envelope edge",
+    args: { config_overrides: {}, altitude_m: 11000.0, mach_flight: 0.9, T04_target: 1400.0 },
+  },
+  {
+    name: "off-design: rejects a centrifugal-compressor design point",
+    args: { config_overrides: { compressor_type: "centrifugal" }, altitude_m: 0.0, mach_flight: 0.0, T04_target: 1400.0 },
+    expectError: true,
+  },
+  {
+    name: "off-design: rejects a design point whose nozzle never chokes",
+    args: { config_overrides: { pi_c: 2.0, T04: 900.0 }, altitude_m: 0.0, mach_flight: 0.0, T04_target: 900.0 },
+    expectError: true,
+  },
+  {
+    name: "off-design: rejects an infeasible T04_target off-design query",
+    args: { config_overrides: {}, altitude_m: 0.0, mach_flight: 0.0, T04_target: 2200.0 },
+    expectError: true,
+  },
+];
+
+function runPython(script, overridesOrArgs) {
   const out = execFileSync(
-    "python3", [PY_SCRIPT, JSON.stringify(overrides)],
+    "python3", [script, JSON.stringify(overridesOrArgs)],
     { cwd: REPO_ROOT, encoding: "utf-8" }
   );
   return JSON.parse(out);
 }
 
-function runJs(overrides) {
+function runJs(script, overridesOrArgs) {
   const out = execFileSync(
-    "node", [JS_SCRIPT, JSON.stringify(overrides)],
+    "node", [script, JSON.stringify(overridesOrArgs)],
     { cwd: __dirname, encoding: "utf-8" }
   );
   return JSON.parse(out);
@@ -142,11 +195,14 @@ function diff(pathStr, a, b) {
 
 function main() {
   let anyFailed = false;
+  let totalScenarios = 0;
+
   for (const scenario of SCENARIOS) {
+    totalScenarios += 1;
     process.stdout.write(`Scenario: ${scenario.name} ... `);
     let pyResult, jsResult;
     try {
-      pyResult = runPython(scenario.overrides);
+      pyResult = runPython(PY_SCRIPT, scenario.overrides);
     } catch (err) {
       console.log("FAIL (python error)");
       console.error(err.stderr ? err.stderr.toString() : err);
@@ -154,7 +210,7 @@ function main() {
       continue;
     }
     try {
-      jsResult = runJs(scenario.overrides);
+      jsResult = runJs(JS_SCRIPT, scenario.overrides);
     } catch (err) {
       console.log("FAIL (js error)");
       console.error(err.stderr ? err.stderr.toString() : err);
@@ -173,11 +229,66 @@ function main() {
     }
   }
 
+  for (const scenario of OFF_DESIGN_SCENARIOS) {
+    totalScenarios += 1;
+    process.stdout.write(`Scenario: ${scenario.name} ... `);
+    let pyResult, jsResult;
+    try {
+      pyResult = runPython(PY_OFFDESIGN_SCRIPT, scenario.args);
+    } catch (err) {
+      console.log("FAIL (python error)");
+      console.error(err.stderr ? err.stderr.toString() : err);
+      anyFailed = true;
+      continue;
+    }
+    try {
+      jsResult = runJs(JS_OFFDESIGN_SCRIPT, scenario.args);
+    } catch (err) {
+      console.log("FAIL (js error)");
+      console.error(err.stderr ? err.stderr.toString() : err);
+      anyFailed = true;
+      continue;
+    }
+
+    const pyIsError = pyResult && pyResult.error === "OffDesignError";
+    const jsIsError = jsResult && jsResult.error === "OffDesignError";
+    if (scenario.expectError) {
+      if (pyIsError && jsIsError) {
+        console.log("OK (both raised OffDesignError, as expected)");
+      } else {
+        console.log("FAIL (expected both sides to raise OffDesignError)");
+        console.error(`  python raised: ${pyIsError}, js raised: ${jsIsError}`);
+        if (!pyIsError) console.error(`  python result: ${JSON.stringify(pyResult)}`);
+        if (!jsIsError) console.error(`  js result: ${JSON.stringify(jsResult)}`);
+        anyFailed = true;
+      }
+      continue;
+    }
+    if (pyIsError || jsIsError) {
+      console.log("FAIL (unexpected OffDesignError)");
+      if (pyIsError) console.error(`  python: ${pyResult.message}`);
+      if (jsIsError) console.error(`  js: ${jsResult.message}`);
+      anyFailed = true;
+      continue;
+    }
+
+    const mismatches = diff("result", pyResult, jsResult);
+    if (mismatches.length === 0) {
+      console.log("OK");
+    } else {
+      console.log(`FAIL (${mismatches.length} mismatch(es))`);
+      for (const m of mismatches) {
+        console.error(`  ${m}`);
+      }
+      anyFailed = true;
+    }
+  }
+
   if (anyFailed) {
-    console.error("\nParity check FAILED — Python and JS engines disagree on at least one scenario.");
+    console.error("\nParity check FAILED — Python and JS off-design/engine solvers disagree on at least one scenario.");
     process.exit(1);
   } else {
-    console.log(`\nParity check PASSED — ${SCENARIOS.length} scenario(s), Python and JS agree to rel tol ${REL_TOL}.`);
+    console.log(`\nParity check PASSED — ${totalScenarios} scenario(s), Python and JS agree to rel tol ${REL_TOL}.`);
   }
 }
 
