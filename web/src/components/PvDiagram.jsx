@@ -1,4 +1,5 @@
 import { fmt } from "../utils/format.js";
+import { resolveLabelOffsets } from "../utils/labelPlacement.js";
 
 const STATION_ORDER = ["a", "2", "3", "4", "5", "9"];
 
@@ -47,6 +48,15 @@ export default function PvDiagram({ stations }) {
     .map((p) => `station ${p.key}: ${fmt(p.p, 0)} kPa, v ${fmt(p.v, 3)} m³/kg`)
     .join("; ");
 
+  // Points close together in (v, p) space would otherwise print labels on
+  // top of each other — nudge each label to whichever of a few candidate
+  // positions doesn't collide with one already placed. See
+  // utils/labelPlacement.js.
+  const labelText = points.map((p) => `${p.key} (${fmt(p.p, 0)} kPa)`);
+  const labelOffsets = resolveLabelOffsets(
+    points.map((p, i) => ({ x: xScale(p.v), y: yScale(p.p), text: labelText[i] }))
+  );
+
   return (
     <div className="ts-diagram">
       <svg
@@ -74,14 +84,22 @@ export default function PvDiagram({ stations }) {
         <path d={pathD} className="ts-path" fill="none" />
 
         {/* points + labels */}
-        {points.map((p) => (
-          <g key={p.key}>
-            <circle cx={xScale(p.v)} cy={yScale(p.p)} r={4} className="ts-point" />
-            <text x={xScale(p.v) + 8} y={yScale(p.p) - 8} className="ts-point-label">
-              {p.key} ({fmt(p.p, 0)} kPa)
-            </text>
-          </g>
-        ))}
+        {points.map((p, i) => {
+          const off = labelOffsets[i];
+          return (
+            <g key={p.key}>
+              <circle cx={xScale(p.v)} cy={yScale(p.p)} r={4} className="ts-point" />
+              <text
+                x={xScale(p.v) + off.dx}
+                y={yScale(p.p) + off.dy}
+                textAnchor={off.anchor}
+                className="ts-point-label"
+              >
+                {labelText[i]}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
       <table className="sr-only">
