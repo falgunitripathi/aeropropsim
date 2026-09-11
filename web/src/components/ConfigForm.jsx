@@ -17,7 +17,7 @@ import { buildShareUrl } from "../utils/shareLink.js";
  * physics/engine.js `defaultEngineConfig`); `onChange` receives a partial
  * patch to merge in, mirroring the parent's state-update pattern.
  */
-export default function ConfigForm({ config, onChange, onReset }) {
+export default function ConfigForm({ config, onChange, onReset, onCollapse }) {
   const [copied, setCopied] = useState(false);
   const [massFlowOpen, setMassFlowOpen] = useState(false);
 
@@ -48,6 +48,17 @@ export default function ConfigForm({ config, onChange, onReset }) {
           <button type="button" className="reset-button" onClick={onReset}>
             Reset to defaults
           </button>
+          {onCollapse && (
+            <button
+              type="button"
+              className="reset-button config-form-collapse-button"
+              onClick={onCollapse}
+              aria-label="Hide engine configuration panel"
+              title="Hide this panel to free up space"
+            >
+              ⟨⟨ Hide
+            </button>
+          )}
         </div>
       </div>
       <FlightConditionsSection config={config} onChange={onChange} />
