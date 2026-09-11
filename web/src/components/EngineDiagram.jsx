@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useAnimatedNumber } from "../hooks/useAnimatedNumber.js";
 import { fmt, fmtKPa } from "../utils/format.js";
 import { stationHeatColor } from "../utils/heatColor.js";
+import { resolveLabelOffsets } from "../utils/labelPlacement.js";
 
 /**
  * A live, clickable schematic of the engine being configured, drawn as a
@@ -39,13 +40,23 @@ const SECTION = {
   nozzle: { x0: 662, x1: 860 },
 };
 
+// `seq` is this station's position in simple flow order (1st through the
+// engine to 6th) — shown alongside the traditional textbook `key` so
+// stations read as an obvious sequence even though the keys themselves
+// jump from 5 to 9. That jump is intentional, not a typo: it's the
+// standard gas-turbine station numbering (Cohen, Rogers & Saravanamuttoo,
+// "Gas Turbine Theory"), which reserves stations 6, 7, and 8 for an
+// afterburner/reheat section this model doesn't include. Renumbering the
+// underlying keys would ripple through the physics modules, tests, and
+// every other chart that indexes `stations["a"|"2"|"3"|"4"|"5"|"9"]`, for
+// no functional benefit — so this is a display-only fix.
 const STATIONS = [
-  { key: "a", x: 20, name: "Freestream" },
-  { key: "2", x: SECTION.intake.x1, name: "Intake exit" },
-  { key: "3", x: SECTION.compressor.x1, name: "Compressor exit" },
-  { key: "4", x: SECTION.combustor.x1, name: "Combustor exit" },
-  { key: "5", x: SECTION.turbine.x1, name: "Turbine exit" },
-  { key: "9", x: SECTION.nozzle.x1, name: "Nozzle exit" },
+  { key: "a", x: 20, name: "Freestream", seq: 1 },
+  { key: "2", x: SECTION.intake.x1, name: "Intake exit", seq: 2 },
+  { key: "3", x: SECTION.compressor.x1, name: "Compressor exit", seq: 3 },
+  { key: "4", x: SECTION.combustor.x1, name: "Combustor exit", seq: 4 },
+  { key: "5", x: SECTION.turbine.x1, name: "Turbine exit", seq: 5 },
+  { key: "9", x: SECTION.nozzle.x1, name: "Nozzle exit", seq: 6 },
 ];
 
 // The upper-half casing silhouette, as (x, yOffsetFromCenterline) control
@@ -281,13 +292,19 @@ function InspectToolbar({ activeKind, onSelect }) {
  * a proper graph with axes and a scale, not just a bigger picture. Shown
  * only in the expanded view, where there's room for it alongside the
  * enlarged diagram.
+ *
+ * Every station gets its own value label (not just the last one) — including
+ * a literal "0" where a value is genuinely zero — and labels are nudged to
+ * whichever of a few candidate positions avoids colliding with a
+ * neighboring label (see utils/labelPlacement.js), since six evenly-spaced
+ * stations can easily land close together in y when a trend is flat.
  */
 function StationTrendChart({ title, values, unit, color, decimals = 0 }) {
   const w = 280;
-  const h = 130;
+  const h = 148;
   const padL = 8;
   const padR = 40;
-  const padT = 14;
+  const padT = 22;
   const padB = 20;
   const plotW = w - padL - padR;
   const plotH = h - padT - padB;
@@ -300,11 +317,16 @@ function StationTrendChart({ title, values, unit, color, decimals = 0 }) {
     return [x, y];
   });
   const pathD = points.map(([x, y], i) => `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
-  const [lastX, lastY] = points[points.length - 1];
+
+  const labelText = values.map((v) => fmt(v, decimals));
+  const labelOffsets = resolveLabelOffsets(
+    points.map(([x, y], i) => ({ x, y, text: labelText[i] })),
+    { estCharWidth: 5, estHeight: 11 }
+  );
 
   return (
     <div className="ed-trend-card">
-      <p className="ed-trend-title">{title}</p>
+      <p className="ed-trend-title">{title} ({unit})</p>
       <svg
         viewBox={`0 0 ${w} ${h}`}
         className="ed-trend-svg"
@@ -314,14 +336,24 @@ function StationTrendChart({ title, values, unit, color, decimals = 0 }) {
         <line x1={padL} y1={padT + plotH} x2={padL + plotW} y2={padT + plotH} className="ed-trend-axis" />
         <line x1={padL} y1={padT} x2={padL + plotW} y2={padT} className="ed-trend-gridline" />
         <path d={pathD} className="ed-trend-line" stroke={color} />
-        {points.map(([x, y], i) => (
-          <circle key={STATIONS[i].key} cx={x} cy={y} r="4" fill={color} className="ed-trend-dot">
-            <title>{`St. ${STATIONS[i].key} — ${fmt(values[i], decimals)} ${unit}`}</title>
-          </circle>
-        ))}
-        <text x={lastX + 6} y={lastY + 4} textAnchor="start" className="ed-trend-endlabel">
-          {fmt(values[values.length - 1], decimals)} {unit}
-        </text>
+        {points.map(([x, y], i) => {
+          const off = labelOffsets[i];
+          return (
+            <g key={STATIONS[i].key}>
+              <circle cx={x} cy={y} r="4" fill={color} className="ed-trend-dot">
+                <title>{`St. ${STATIONS[i].key} — ${fmt(values[i], decimals)} ${unit}`}</title>
+              </circle>
+              <text
+                x={x + off.dx}
+                y={y + off.dy}
+                textAnchor={off.anchor}
+                className="ed-trend-pointlabel"
+              >
+                {labelText[i]}
+              </text>
+            </g>
+          );
+        })}
         {STATIONS.map((s, i) => (
           <text key={s.key} x={points[i][0]} y={h - 4} textAnchor="middle" className="ed-trend-tick">
             {s.key}
@@ -353,7 +385,7 @@ function Clickable({ onSelect, label, children }) {
   );
 }
 
-function StationReadout({ station, name, T0, p0, leftPct, onSelect }) {
+function StationReadout({ station, seq, name, T0, p0, leftPct, onSelect }) {
   const animT = useAnimatedNumber(T0);
   const animP = useAnimatedNumber(p0 / 1000);
   return (
@@ -372,8 +404,8 @@ function StationReadout({ station, name, T0, p0, leftPct, onSelect }) {
     >
       <span className="station-dot" aria-hidden="true" />
       <div className="station-card">
-        <span className="station-tag">St. {station}</span>
-        <span className="station-name">{name}</span>
+        <span className="station-tag">Step {seq} of {STATIONS.length}</span>
+        <span className="station-name">St. {station} — {name}</span>
         <span className="station-num">{fmt(animT, 0)} K</span>
         <span className="station-num station-num-muted">{fmt(animP, 0)} kPa</span>
       </div>
@@ -470,9 +502,9 @@ function partDetails(kind, result, config) {
 }
 
 /** Plain-English value list for a clicked station marker — the full row, spelled out. */
-function stationDetails(key, name, st) {
+function stationDetails(key, name, seq, st) {
   return {
-    title: `Station ${key} — ${name}`,
+    title: `Step ${seq} of ${STATIONS.length} — Station ${key} — ${name}`,
     rows: [
       ["Stagnation temperature", `${fmt(st.T0, 1)} K`],
       ["Stagnation pressure", `${fmtKPa(st.p0, 1)} kPa`],
@@ -530,7 +562,7 @@ function Diagram({ config, result, idSuffix }) {
 
   function selectStation(s) {
     setSelected({
-      details: stationDetails(s.key, s.name, stations[s.key]),
+      details: stationDetails(s.key, s.name, s.seq, stations[s.key]),
       leftPct: ((s.x + MARGIN) / TOTAL_W) * 100,
       kind: null,
     });
@@ -765,6 +797,7 @@ function Diagram({ config, result, idSuffix }) {
           <StationReadout
             key={s.key}
             station={s.key}
+            seq={s.seq}
             name={s.name}
             T0={stations[s.key].T0}
             p0={stations[s.key].p0}
@@ -783,6 +816,15 @@ function Diagram({ config, result, idSuffix }) {
         to red through the compressor and combustor, cooling back down
         through the turbine and nozzle. Compressor: {compressor.type}.
         Turbine: {turbine.type}.
+      </p>
+      <p className="section-note">
+        Each station marker shows &ldquo;Step 1 of 6&rdquo; through
+        &ldquo;Step 6 of 6&rdquo; in simple flow order. The St. a/2/3/4/5/9
+        labels underneath are the standard gas-turbine station numbers from
+        the textbook this project is built from (Cohen, Rogers &amp;
+        Saravanamuttoo) — they intentionally skip 6, 7, and 8, which that
+        convention reserves for an afterburner/reheat section this model
+        doesn&rsquo;t include, so 5 is followed by 9 rather than 6.
       </p>
       </div>
     </div>
