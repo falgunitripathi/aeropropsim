@@ -19,6 +19,12 @@ const STATION_LABELS = {
  * nozzle's real total-pressure loss made visible (see
  * `Station.fromStatic`'s docstring in gasstate.js); its T0 should equal
  * station 5's T0 (adiabatic nozzle) as a running self-consistency check.
+ *
+ * The leading "Step" column numbers these 1-6 in simple flow order, since
+ * the traditional station numbers themselves (a, 2, 3, 4, 5, 9) jump from
+ * 5 to 9 — that's the standard gas-turbine convention (stations 6-8 are
+ * reserved for an afterburner/reheat section this model doesn't include),
+ * not a typo, but it reads oddly without a plain sequence alongside it.
  */
 export default function StationTable({ stations }) {
   return (
@@ -26,6 +32,7 @@ export default function StationTable({ stations }) {
       <table className="station-table">
         <thead>
           <tr>
+            <th>Step</th>
             <th>Station</th>
             <th>T0 (K)</th>
             <th>p0 (kPa)</th>
@@ -39,11 +46,12 @@ export default function StationTable({ stations }) {
           </tr>
         </thead>
         <tbody>
-          {STATION_ORDER.map((key) => {
+          {STATION_ORDER.map((key, i) => {
             const st = stations[key];
             if (!st) return null;
             return (
               <tr key={key}>
+                <td>{i + 1}</td>
                 <td className="station-name">{STATION_LABELS[key] || key}</td>
                 <td>{fmt(st.T0, 1)}</td>
                 <td>{fmtKPa(st.p0, 1)}</td>
