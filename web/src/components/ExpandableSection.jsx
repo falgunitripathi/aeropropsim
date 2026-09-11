@@ -2,13 +2,16 @@ import { useEffect, useId, useRef, useState } from "react";
 
 /**
  * Generic click-to-expand wrapper for heavier analysis sections. Shows a
- * compact header with a title, an optional one-line summary, and an
- * "Expand" button; clicking it pops the full content (passed as children)
- * into a full-screen modal — the same overlay/close/Escape/scroll-lock
- * pattern already used by EngineDiagram, generalized so new sections don't
- * have to grow the results page inline.
+ * compact header on the results page — just a title and an "Expand"
+ * button, nothing else — so stacking many of these sections doesn't turn
+ * the main page into a wall of description text to scroll past. Clicking
+ * "Expand" pops the title, the one-line summary, and the full content
+ * (passed as children) together into a right-side sliding panel — the
+ * same overlay/close/Escape/scroll-lock pattern already used by
+ * EngineDiagram, generalized so new sections don't have to grow the
+ * results page inline.
  *
- * Accessibility: the modal is a proper dialog (role="dialog",
+ * Accessibility: the panel is a proper dialog (role="dialog",
  * aria-modal="true", labeled by its own title) rather than a div that only
  * looks like one. Opening it moves focus to the close button; closing it —
  * by button, overlay click, or Escape — returns focus to whichever element
@@ -62,8 +65,6 @@ export default function ExpandableSection({ title, summary, defaultExpanded = fa
           ⤢ Expand
         </button>
       </div>
-      {summary && <p className="section-note">{summary}</p>}
-
       {expanded && (
         <div
           className="ed-modal-overlay"
@@ -84,6 +85,7 @@ export default function ExpandableSection({ title, summary, defaultExpanded = fa
             <div className="engine-diagram-toolbar">
               <span className="engine-diagram-title" id={titleId}>{title}</span>
             </div>
+            {summary && <p className="section-note expandable-section-summary">{summary}</p>}
             <div className="expandable-section-body">{children}</div>
           </div>
         </div>
