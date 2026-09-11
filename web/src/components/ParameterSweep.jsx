@@ -68,12 +68,17 @@ export default function ParameterSweep({ config }) {
   return (
     <ExpandableSection
       title="Parameter sweep"
-      summary="Vary one input across a range and see how thrust, TSFC, and overall efficiency respond. Expand to sweep one."
+      summary="Automatically re-solves the engine many times over a range of one input, so you don't have to manually retype it and re-check the results each time — e.g. sweep pressure ratio 4 → 20 to see thrust, TSFC, and efficiency plotted across that whole range at once. Expand to try one."
     >
       <p className="section-note">
-        Vary one input across a range — every other setting stays as
-        currently configured on the left — and see how thrust, TSFC, and
-        overall efficiency respond.
+        What this does: pick one input below (e.g. &ldquo;Compressor
+        pressure ratio π_c&rdquo;), set a from/to range, and this re-solves
+        the whole engine cycle at each point in that range — every other
+        setting stays exactly as currently configured on the left — then
+        plots how thrust, TSFC, and overall efficiency respond across it.
+        It&rsquo;s the fast way to answer &ldquo;what happens to
+        performance if I dial this one number up or down?&rdquo; without
+        changing it by hand and re-reading the results panel over and over.
       </p>
       <div className="sweep-controls">
         <SelectField
@@ -151,4 +156,3 @@ export default function ParameterSweep({ config }) {
     </ExpandableSection>
   );
 }
-
