@@ -277,6 +277,38 @@ at its exact location in the code.
    status" above for the full reasoning). Neither pair is a bug; each
    module's docstring explains why the default was chosen and where the
    alternate, book-matching convention lives.
+8. **Turbine T05/p05 come from the shaft power balance only — stage count
+   and axial/radial choice don't feed back into them** (`engine.py`, see
+   its own "Architecture note"): `matching.turbine_pressure_ratio`
+   computes the overall p05/p04 directly from the energy balance (T04,
+   T05, and the per-stage efficiency treated as if it were a single
+   equivalent expansion), and `n_turbine_stages`/`turbine_type` only
+   decide how that already-fixed expansion is broken up for the
+   per-stage station table (or, for radial, how blade speed is sized) —
+   they don't change T05, p05, thrust, or TSFC at all (confirmed:
+   bit-identical results for `n_turbine_stages` = 1, 2, 3, 5 and for
+   `turbine_type` = "axial" vs. "radial", all else fixed). This is the
+   turbine-side mirror of the compressor's stage-stacking, but going the
+   other direction: for the compressor, overall pressure ratio is the
+   independent user input and stage count changes the temperature rise
+   needed to reach it (a real "preheat factor" effect, confirmed to
+   genuinely vary with stage count); for the turbine, T04 and T05 are
+   both already fixed by the user's TIT and the shaft balance, so a real
+   multi-stage "reheat factor" would need stage count to change the
+   *pressure* ratio for that *same* temperature drop instead — which
+   this codebase doesn't model. Quantified for the default configuration
+   (T04=1400 K, T05≈1117.5 K, eta_tt=0.90): the true stage-by-stage p05/p04
+   for that same temperature drop is about +0.7% (2 stages) to +1.2%
+   (8 stages) higher than the single-equivalent-stage value this project
+   actually uses — a real but modest gap for typical stage counts, not
+   currently caught by any test (the existing turbine-stacking tests only
+   check that stacking hits whatever target it's handed, not that the
+   target itself is stage-count-correct). Left as-is rather than silently
+   patched, since fixing it properly means changing what `n_turbine_stages`
+   drives (letting the actual pressure ratio be an *output* of stacking a
+   known, fixed temperature drop, rather than an input) — a real
+   architecture change across `matching.py`/`turbine.py`/`engine.py` (and
+   their JS twins), not a one-line fix.
 
 ## Not yet implemented (by design — later phases)
 
