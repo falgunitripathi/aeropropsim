@@ -113,6 +113,16 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
             <p className="section-note">
               Overall expansion ratio achieved: {fmt(1.0 / turbine.pr_actual, 3)}
             </p>
+            <p className="section-note">
+              Unlike the compressor above, this expansion ratio itself is
+              fixed by the shaft power balance (from TIT and the
+              compressor's power demand) before this table is built —
+              turbine stage count only changes how that already-fixed
+              expansion is broken up for display, not the thrust/TSFC
+              you see elsewhere on this page (see README, "Known
+              simplifications" item 8, for the quantified gap this leaves
+              vs. a true stage-by-stage calculation).
+            </p>
             {turbine.type === "radial" && (
               <p className="section-note">
                 In calculation form: spouting velocity V0 ={" "}
@@ -178,3 +188,4 @@ export default function ResultsPanel({ result, config, savedConfigs, onSaveConfi
     </div>
   );
 }
+
