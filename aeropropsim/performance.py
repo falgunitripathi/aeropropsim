@@ -70,7 +70,20 @@ def breguet_range(Q_R: float, eta_0: float, g: float, L_over_D: float,
     return (Q_R * eta_0 / g) * L_over_D * math.log(m1 / m2)
 
 
-def breguet_endurance(tsfc_val: float, L_over_D: float, m1: float,
+def breguet_endurance(tsfc_val: float, g: float, L_over_D: float, m1: float,
                        m2: float) -> float:
-    """E = (1/TSFC)*(L/D)*ln(m1/m2).  Ref: §9, p.157-163 (bonus)."""
-    return (1.0 / tsfc_val) * L_over_D * math.log(m1 / m2)
+    """E = (L/D)/(TSFC*g) * ln(m1/m2).  Ref: §9, p.157-163 (bonus).
+
+    Derived from dm/dt = -tsfc*T (this module's mass-based TSFC, kg per
+    N per s) and T = m*g/(L/D) for level cruise:
+        dm/dt = -tsfc*g*m/(L/D)  =>  E = (L/D)/(tsfc*g) * ln(m1/m2)
+
+    The `g` divisor was missing in an earlier version of this function —
+    without it, 1/tsfc_val actually carries units of velocity (an
+    "effective exhaust velocity", T/mdot_f), not time, so the result was
+    off by a factor of g (~9.81x too large). Caught by cross-checking
+    against breguet_range in the same module (which already includes /g)
+    via the R = V*E identity for constant cruise V — see
+    test_performance.py::test_breguet_range_endurance_velocity_identity.
+    """
+    return (L_over_D / (tsfc_val * g)) * math.log(m1 / m2)
