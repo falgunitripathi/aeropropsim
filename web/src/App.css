@@ -123,6 +123,30 @@
   overflow-y: auto;
 }
 
+/*
+ * At the mobile breakpoint .app-main drops to a single column, so the
+ * config form and the results area become two separate GRID ROWS stacked
+ * on top of each other rather than two columns sharing one row. Sticky
+ * positioning on a grid item is scoped to the whole grid container's
+ * height, not just its own row/cell — so left as `position: sticky`, the
+ * config form stayed pinned to the top of the viewport for the entire
+ * scroll height of BOTH rows combined (its own plus the much taller
+ * results row below it), rendered on top of and overlapping the results
+ * content for most of the page instead of scrolling away once its own
+ * section ends. Turning off sticky (and the stretch/height rules that
+ * only make sense paired with it) here restores normal stacked-block flow:
+ * the config form scrolls away above the results area like any other
+ * block, exactly as a single mobile column should behave.
+ */
+@media (max-width: 900px) {
+  .config-form {
+    position: static;
+    align-self: auto;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
 .config-form-header {
   display: flex;
   align-items: center;
@@ -263,6 +287,13 @@
 
 .results-panel section {
   margin-bottom: 34px;
+}
+
+/* .results-section rows sit right next to each other as one continuous
+   divided list (like ConfigForm's fieldsets) rather than getting the
+   generic section spacing above on top of their own border-bottom/padding. */
+.results-panel .results-section {
+  margin-bottom: 0;
 }
 
 .results-panel h2 {
@@ -757,10 +788,13 @@
  * Opens as a right-side sliding panel rather than a centered/downward
  * overlay — full viewport height, anchored to the right edge, so it reads
  * as a drawer next to the page rather than something dropping down over
- * it. Shared by every <ExpandableSection> (Station analysis, Compressor &
- * turbine stages, Cycle diagrams, Parameter sweep, etc.) and by
- * EngineDiagram's own "Live engine cutaway" expand — same two class names,
- * so this one change covers all of them.
+ * it. Used only by EngineDiagram's own "Live engine cutaway" expand (a
+ * genuine zoom — the live diagram already renders inline at normal size;
+ * this just gives it more room). Every other results section
+ * (<ExpandableSection>: Station analysis, Compressor & turbine stages,
+ * Cycle diagrams, Parameter sweep, etc.) instead expands in place — see
+ * .results-section below — so it reads as one continuous panel of named
+ * sections, the same way the engine configuration sidebar does.
  */
 .ed-modal-overlay {
   position: fixed;
@@ -809,13 +843,6 @@
   }
 }
 
-/* Two-up layouts (stage tables, T-s/P-v diagrams) read better as a single
-   stacked column at the panel's narrower width than they did in the old,
-   wider centered modal. */
-.ed-modal-content .stage-tables-row {
-  grid-template-columns: 1fr;
-}
-
 .ed-modal-close {
   position: absolute;
   top: 14px;
@@ -832,12 +859,86 @@
   color: var(--accent);
 }
 
-.expandable-section-summary {
-  margin-bottom: 10px;
+/*
+ * <ExpandableSection> — one row in the results panel. Deliberately mirrors
+ * .config-section/.disclosure (ConfigForm's own fieldsets): a border-bottom
+ * divider instead of a boxed card, and a chevron + uppercase label header
+ * that reveals its content in place. This is what makes the results side
+ * of the app read as the same kind of panel as the engine configuration
+ * sidebar, rather than a stack of separate cards or popup drawers.
+ */
+.results-section {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 0;
 }
 
-.expandable-section-body {
-  margin-top: 4px;
+.results-section:last-child {
+  border-bottom: none;
+}
+
+.results-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.results-section-header:hover {
+  color: var(--accent);
+}
+
+.results-section-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.results-section-chevron {
+  font-size: 12px;
+  flex: none;
+  color: var(--text-muted);
+}
+
+.results-section-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.results-section-header-loading {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.results-section-header-loading:hover {
+  color: var(--text-muted);
+}
+
+.results-section-loading-label {
+  margin-left: auto;
+  font-size: 12.5px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: var(--sans);
+  font-weight: 500;
+}
+
+.results-section-body {
+  margin-top: 16px;
+}
+
+.expandable-section-summary {
+  margin: 0 0 14px;
 }
 
 /* --- Glossary (collapsible plain-English legend) --- */
