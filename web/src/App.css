@@ -24,6 +24,13 @@
   line-height: 1.55;
 }
 
+/* Config sidebar (left) + results column (right) — always two columns,
+   at every viewport width. Below the old 900px breakpoint this used to
+   collapse to a single stacked column; that made the results accordion
+   render full-width below the config form on a laptop-width or narrower
+   window, which read as if the panel had lost its place on the right
+   side of the page. Two columns are kept unconditionally now — a very
+   narrow window scrolls horizontally rather than restacking. */
 .app-main {
   flex: 1;
   display: grid;
@@ -32,22 +39,10 @@
   align-items: start;
 }
 
-@media (max-width: 900px) {
-  .app-main {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* The whole config sidebar tucked away — a slim reopen strip instead of
    the 360px column, so the results area gets almost the full width. */
 .app-main-sidebar-collapsed {
   grid-template-columns: 44px 1fr;
-}
-
-@media (max-width: 900px) {
-  .app-main-sidebar-collapsed {
-    grid-template-columns: 44px 1fr;
-  }
 }
 
 .sidebar-reopen-button {
@@ -121,30 +116,6 @@
    */
   max-height: 100vh;
   overflow-y: auto;
-}
-
-/*
- * At the mobile breakpoint .app-main drops to a single column, so the
- * config form and the results area become two separate GRID ROWS stacked
- * on top of each other rather than two columns sharing one row. Sticky
- * positioning on a grid item is scoped to the whole grid container's
- * height, not just its own row/cell — so left as `position: sticky`, the
- * config form stayed pinned to the top of the viewport for the entire
- * scroll height of BOTH rows combined (its own plus the much taller
- * results row below it), rendered on top of and overlapping the results
- * content for most of the page instead of scrolling away once its own
- * section ends. Turning off sticky (and the stretch/height rules that
- * only make sense paired with it) here restores normal stacked-block flow:
- * the config form scrolls away above the results area like any other
- * block, exactly as a single mobile column should behave.
- */
-@media (max-width: 900px) {
-  .config-form {
-    position: static;
-    align-self: auto;
-    max-height: none;
-    overflow-y: visible;
-  }
 }
 
 .config-form-header {
