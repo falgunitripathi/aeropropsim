@@ -181,7 +181,8 @@ def solve_engine(cfg: EngineConfig) -> EngineResult:
     # eta_t here is the OVERALL turbine isentropic efficiency needed for the
     # pressure-ratio step; approximate it with the per-stage eta_tt_stage
     # (a total-to-total value) as the working overall value for v1 — see
-    # README "Known simplifications".
+    # README "Known simplifications" item 8 (quantifies the resulting gap
+    # vs. a true stage-by-stage reheat-factor calculation).
     p05_over_p04 = turbine_pressure_ratio(T05_over_T04, cfg.eta_tt_stage, cfg.gamma_h)
     p05 = p05_over_p04 * p04
     result.shaft = {"T05": T05, "p05": p05, "T05_over_T04": T05_over_T04,
